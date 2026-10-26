@@ -74,11 +74,11 @@ Build mode: fast — chosen by the agent under the learner's delegation and the 
 - [ ] Optional edit and transfer reflection addressed — offered/declined/already covered/not applicable as appropriate
 - [ ] `devpost/app-map.html` generated from finished code, checked, and shown, including a project-grounded practice to reuse
 
-Activity and evidence: [pending]
-Route and stops: [pending]
-Edit outcome: [pending]
-Reflection: [pending]
-Activity mode: [pending]
+Activity and evidence: `devpost/app-map.html` generated from the finished code at commit `b30df28` and its paths/snippets checked against source. The guided activity has not happened yet — the learner was not present during the build.
+Route and stops: reference route only — `public/app.js > submitAnswer` → `server.js` `/api/viva/grade` + `src/examiners/aiExaminer.js > grade` → `public/app.js > heatRegions`/`renderCode`.
+Edit outcome: not offered yet.
+Reflection: not offered yet.
+Activity mode: static reference map; live walkthrough pending with the learner.
 
 ## Revisions
 

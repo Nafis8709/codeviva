@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CodeViva App Map</title>
+<style>
+  :root {
+    --paper: #F5F0E6; --raised: #FBF8F2; --ink: #1C2A3F; --muted: #5B6577; --rule: #E2D9C8;
+    --red: #C0392B; --amber: #C98A1B; --green: #2E7D4F; --wash: #FFF1C9;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #141B26; --raised: #1B2433; --ink: #E8E2D5; --muted: #A2AAB8; --rule: #2C3647; --wash: #3A3320;
+    }
+  }
+  :root[data-theme="dark"] { --paper: #141B26; --raised: #1B2433; --ink: #E8E2D5; --muted: #A2AAB8; --rule: #2C3647; --wash: #3A3320; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.6 Georgia, 'Times New Roman', serif; }
+  main { max-width: 860px; margin: 0 auto; padding: 32px 16px 56px; }
+  h1 { font-size: 2rem; margin: 0 0 4px; }
+  h2 { font-size: 1.25rem; margin: 36px 0 10px; border-bottom: 1px solid var(--rule); padding-bottom: 6px; }
+  p, li { max-width: 70ch; }
+  .eyebrow { font: 600 0.78rem/1 system-ui, sans-serif; letter-spacing: 0.14em; text-transform: uppercase; color: var(--red); }
+  .muted { color: var(--muted); }
+  code, pre { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.86rem; }
+  code { background: rgba(127, 127, 127, 0.15); padding: 0 4px; border-radius: 3px; }
+  pre { background: var(--raised); border: 1px solid var(--rule); border-left: 3px solid var(--red); padding: 12px 14px; overflow-x: auto; border-radius: 4px; }
+  .card { background: var(--raised); border: 1px solid var(--rule); border-radius: 6px; padding: 16px 18px; margin: 12px 0; }
+  details { background: var(--raised); border: 1px solid var(--rule); border-radius: 6px; padding: 12px 16px; margin: 10px 0; }
+  summary { cursor: pointer; font-weight: 600; }
+  summary:focus-visible, a:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+  a { color: var(--red); }
+  svg text { font-family: system-ui, sans-serif; fill: var(--ink); }
+  .diagram { width: 100%; height: auto; display: block; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.95rem; }
+  td, th { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Devpost Learn · app map</p>
+  <h1>CodeViva — where things live</h1>
+  <p class="muted">A snapshot of the finished proof of concept (source commit <code>b30df28</code>, Oct 26 2026). The code can drift after this; the paths and function names below are the anchors to search for.</p>
+
+  <h2>The app in four pieces</h2>
+  <ul>
+    <li><strong>The page</strong> (<code>public/index.html</code>, <code>public/styles.css</code>, <code>public/app.js</code>) — setup, viva and report screens. Holds the whole session in one <code>state</code> object.</li>
+    <li><strong>The server</strong> (<code>server.js</code>) — serves the page and four JSON routes. Stateless: every request carries the files and history.</li>
+    <li><strong>The examiners</strong> (<code>src/examiners/</code>) — the AI examiner (prompt → model → validation) and the labelled demo examiner (scripted, no AI). Same three functions: <code>askQuestion</code>, <code>grade</code>, <code>report</code>.</li>
+    <li><strong>The guards</strong> (<code>src/code.js</code>, <code>src/scoring.js</code>) — snap model line numbers onto real code, and compute the ownership score without the AI.</li>
+  </ul>
+
+  <h2>One action, end to end: “Submit answer”</h2>
+  <svg class="diagram" viewBox="0 0 820 230" role="img" aria-label="Submit answer flows from app.js to server.js to the examiner and back to the code heatmap">
+    <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#C0392B"/></marker></defs>
+    <rect x="10" y="30" width="180" height="76" rx="6" fill="none" stroke="#C0392B" stroke-width="1.5"/>
+    <text x="100" y="58" text-anchor="middle" font-weight="600">public/app.js</text>
+    <text x="100" y="80" text-anchor="middle" font-size="13">submitAnswer()</text>
+    <rect x="240" y="30" width="180" height="76" rx="6" fill="none" stroke="#C0392B" stroke-width="1.5"/>
+    <text x="330" y="58" text-anchor="middle" font-weight="600">server.js</text>
+    <text x="330" y="80" text-anchor="middle" font-size="13">POST /api/viva/grade</text>
+    <rect x="470" y="30" width="200" height="76" rx="6" fill="none" stroke="#C0392B" stroke-width="1.5"/>
+    <text x="570" y="58" text-anchor="middle" font-weight="600">aiExaminer.js</text>
+    <text x="570" y="80" text-anchor="middle" font-size="13">grade() → verdictForScore</text>
+    <rect x="700" y="38" width="110" height="60" rx="30" fill="none" stroke="#5B6577" stroke-dasharray="4 3"/>
+    <text x="755" y="73" text-anchor="middle" font-size="13">Gemini</text>
+    <rect x="240" y="150" width="400" height="66" rx="6" fill="none" stroke="#2E7D4F" stroke-width="1.5"/>
+    <text x="440" y="176" text-anchor="middle" font-weight="600">public/app.js · renderAnswerTurn() + renderCode()</text>
+    <text x="440" y="198" text-anchor="middle" font-size="13">stamp appears · examined lines turn green / amber / red</text>
+    <line x1="190" y1="68" x2="236" y2="68" stroke="#C0392B" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <line x1="420" y1="68" x2="466" y2="68" stroke="#C0392B" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <line x1="670" y1="68" x2="696" y2="68" stroke="#5B6577" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <path d="M570 106 C 570 130, 560 140, 540 148" fill="none" stroke="#2E7D4F" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <text x="600" y="134" font-size="12" class="muted">JSON grade</text>
+  </svg>
+
+  <h2>A three-stop route <span class="muted">(reference route — not yet toured together)</span></h2>
+  <details open>
+    <summary>Stop 1 — <code>public/app.js</code> → <code>submitAnswer</code></summary>
+    <p>Reads the answer box, sends the files, settings, history, current question and answer to the server, then either asks the follow-up, fetches the next question, or finishes the viva.</p>
+<pre>const data = await postJson('/api/viva/grade', { ...sessionPayload(), question, answer, dontKnow });
+...
+if (grade.followUp) {
+  askQuestion(grade.followUp);
+} else if (mainCount() &lt; state.settings.totalQuestions) {
+  await fetchNextQuestion();
+} else {
+  await finishViva();
+}</pre>
+  </details>
+  <details>
+    <summary>Stop 2 — <code>server.js</code> → <code>/api/viva/grade</code>, then <code>src/examiners/aiExaminer.js</code> → <code>grade</code></summary>
+    <p>The server enforces the one-follow-up rule. The examiner asks the model, then lets the <em>score</em> decide the verdict so the stamp, the heatmap and the total can never disagree.</p>
+<pre>const followUpAllowed = !question.isFollowUp;          // server.js
+...
+score = normaliseScore(reply.score);                    // aiExaminer.js
+const verdict = verdictForScore(score);</pre>
+  </details>
+  <details>
+    <summary>Stop 3 — <code>public/app.js</code> → <code>heatRegions</code> and <code>renderCode</code></summary>
+    <p>Each examined region takes its final verdict (a follow-up’s better result wins) and the code viewer adds a <code>heat-solid</code>, <code>heat-partial</code> or <code>heat-gap</code> class to those lines. The report reuses the same viewer as the heatmap.</p>
+<pre>if (number &gt;= region.startLine &amp;&amp; number &lt;= region.endLine) {
+  line.classList.add(`heat-${region.verdict}`);
+}</pre>
+  </details>
+
+  <h2>To change this, start here</h2>
+  <table>
+    <tr><th>You want to…</th><th>Start at</th></tr>
+    <tr><td>Change what the examiner asks or how strictly it marks</td><td><code>src/prompts.js</code> → <code>questionPrompt</code>, <code>gradePrompt</code>, <code>systemPrompt</code></td></tr>
+    <tr><td>Change the score thresholds (solid ≥ 8, partial ≥ 4)</td><td><code>src/scoring.js</code> → <code>verdictForScore</code></td></tr>
+    <tr><td>Use a different AI model</td><td><code>.env</code> → <code>GEMINI_MODEL</code>; providers in <code>src/config.js</code></td></tr>
+    <tr><td>Change colours or fonts</td><td><code>public/styles.css</code> → the <code>:root</code> variables</td></tr>
+    <tr><td>Add or translate interface text</td><td><code>public/app.js</code> → <code>STRINGS</code></td></tr>
+    <tr><td>Edit the sample project’s scripted questions</td><td><code>src/examiners/demoExaminer.js</code> → <code>SAMPLE_SCRIPT</code> (lines are found by <code>anchor</code> text)</td></tr>
+  </table>
+
+  <h2>A practice to reuse</h2>
+  <div class="card">
+    <p><strong>Never trust a model’s structured output — validate it against reality.</strong> The spec’s open question was whether a small free model would return correct line numbers (<code>spec.md &gt; Decisions and Open Issues</code>). Instead of hoping, the design sends numbered code, demands a fixed JSON shape, and repairs every reply with <code>clampRange</code>. <code>test/ai.test.js</code> proves it with a fake model that returns a wrong file name and line 400 of a 30-line file.</p>
+    <p>On your next AI feature: write down what the model must return, then write the check that rejects or repairs anything else — before you build the screen that displays it.</p>
+  </div>
+
+  <h2>Run it again</h2>
+<pre>npm install
+cp .env.example .env     # add GEMINI_API_KEY, or leave empty for demo mode
+npm start                # open http://localhost:3000
+npm test</pre>
+</main>
+</body>
+</html>
