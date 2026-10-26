@@ -618,13 +618,12 @@ function renderReport() {
 
   renderReportTranscript();
 
-  // Open the heatmap on the file with the first gap (or the first examined file).
-  const firstGap = (report.gaps || [])[0];
-  const firstTurn = state.history[0];
-  state.activeFile.report = (firstGap && firstGap.file) || (firstTurn && firstTurn.file) || state.files[0].name;
+  // Open the heatmap on the first gap, or on the first examined region.
+  const focus = (report.gaps || [])[0] || state.history[0];
+  state.activeFile.report = focus ? focus.file : state.files[0].name;
   renderCode('report');
-  if (firstGap) {
-    setTimeout(() => scrollToLines('report', firstGap.startLine, false), 50);
+  if (focus) {
+    setTimeout(() => scrollToLines('report', focus.startLine, false), 50);
   }
 }
 

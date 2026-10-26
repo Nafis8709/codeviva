@@ -49,7 +49,7 @@ Build mode: fast — chosen by the agent under the learner's delegation and the 
   Learner check: Put your Gemini key in `.env`, restart, load one of your own SPL files, and check the questions are about your actual lines.
   Commit: `Add Gemini and OpenAI-compatible AI examiner`
 
-- [ ] **5. Real-world inputs: drag-drop and paste, Bangla, voice answers, errors and edge states**
+- [x] **5. Real-world inputs: drag-drop and paste, Bangla, voice answers, errors and edge states**
   Becomes usable: Own files via picker/drag-drop/paste, size and binary checks, Bangla UI strings, mic answers, readable errors with Retry, mobile layout.
   Why now: Turns the working core into a coherent product experience (Design criterion) without touching the kernel.
   PRD ref: `prd.md > Loading Code`, `prd.md > Answering`, `prd.md > States and Boundaries`, `prd.md > Look and Feel`
@@ -86,3 +86,4 @@ Activity mode: [pending]
 - Short numeric keywords in demo grading now match whole words only — the browser walkthrough showed "150" being counted as the answer "0".
 - Report strengths/gaps are now derived from the marked answers instead of written by the model — guarantees the lists match the heatmap; the model writes only the summary and revision plan (`spec.md > AI examiner` behaviour unchanged for the learner).
 - The build sandbox cannot reach the Gemini host, so slice 4 is verified with a mocked `fetch` (request shape, header auth, error mapping) and a fake model (repairs bad file names/line ranges, score-driven verdicts). First live-key run is a learner step.
+- Code-panel scrolling measured line offsets from the wrong ancestor at phone width (highlight off-screen); `.code-view` is now the positioned container. Found by the 390 px headless-browser run.

@@ -344,6 +344,7 @@ h2 {
 .file-tabs button.has-question::after { content: ' ●'; color: var(--amber); }
 
 .code-view {
+  position: relative; /* line offsets are measured from here when scrolling to a question */
   background: #fff;
   font-family: var(--font-code);
   font-size: 0.84rem;

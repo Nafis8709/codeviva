@@ -18,7 +18,7 @@ function readEnv(name) {
 
 function chooseExaminer() {
   if (readEnv('DEMO_MODE') === '1' || readEnv('DEMO_MODE').toLowerCase() === 'true') {
-    return { examiner: demoExaminer, status: { mode: 'demo', model: null, label: 'Demo mode — scripted examiner, no AI' } };
+    return { examiner: demoExaminer, status: { mode: 'demo', model: null, label: 'Demo mode · scripted examiner (no AI)' } };
   }
 
   // AI modules are loaded lazily so demo mode never needs them.
@@ -42,7 +42,7 @@ function chooseExaminer() {
     return { examiner: createAiExaminer(client), status: { mode: 'gemini', model, label: `AI examiner · ${model}` } };
   }
 
-  return { examiner: demoExaminer, status: { mode: 'demo', model: null, label: 'Demo mode — no API key set, scripted examiner' } };
+  return { examiner: demoExaminer, status: { mode: 'demo', model: null, label: 'Demo mode · no API key, scripted examiner' } };
 }
 
 module.exports = { chooseExaminer, DEFAULT_GEMINI_MODEL };
