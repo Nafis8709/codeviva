@@ -9,12 +9,13 @@ const express = require('express');
 const { validateFiles, InputError } = require('./src/code');
 const { computeScore } = require('./src/scoring');
 const { chooseExaminer } = require('./src/config');
+const { LANGUAGE_NAMES } = require('./src/prompts');
 
 function readSettings(raw) {
   const settings = raw || {};
   const totalQuestions = Number(settings.totalQuestions) === 3 ? 3 : 5;
   return {
-    language: settings.language === 'bn' ? 'bn' : 'en',
+    language: Object.prototype.hasOwnProperty.call(LANGUAGE_NAMES, settings.language) ? settings.language : 'en',
     style: settings.style === 'strict' ? 'strict' : 'friendly',
     totalQuestions,
   };
