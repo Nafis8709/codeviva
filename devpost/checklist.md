@@ -39,7 +39,7 @@ Build mode: fast — chosen by the agent under the learner's delegation and the 
   Learner check: Finish a viva and check that the red regions in the heatmap are the questions you struggled with.
   Commit: `Add viva report with ownership score and heatmap`
 
-- [ ] **4. A real AI examiner (Gemini or OpenAI-compatible) asks, grades and reports on any code**
+- [x] **4. A real AI examiner (Gemini or OpenAI-compatible) asks, grades and reports on any code**
   Becomes usable: With `GEMINI_API_KEY` in `.env`, questions/grades/reports come from the model, in English or Bangla, friendly or strict, for any loaded files.
   Why now: Highest external risk, but it slots into the interfaces the demo examiner already proved.
   PRD ref: `prd.md > Asking Line-Anchored Questions`, `prd.md > Grading and Follow-ups`, `prd.md > Examiner Language and Style`
@@ -84,3 +84,5 @@ Activity mode: [pending]
 
 - Slices 1–3 committed together — the page (`public/app.js`) and the demo examiner serve all three behaviours through shared render functions, so they were written in one pass and verified together (18 `node:test` tests + a headless-browser walkthrough of a full 5-question viva).
 - Short numeric keywords in demo grading now match whole words only — the browser walkthrough showed "150" being counted as the answer "0".
+- Report strengths/gaps are now derived from the marked answers instead of written by the model — guarantees the lists match the heatmap; the model writes only the summary and revision plan (`spec.md > AI examiner` behaviour unchanged for the learner).
+- The build sandbox cannot reach the Gemini host, so slice 4 is verified with a mocked `fetch` (request shape, header auth, error mapping) and a fake model (repairs bad file names/line ranges, score-driven verdicts). First live-key run is a learner step.
