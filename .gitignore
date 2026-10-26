@@ -1,0 +1,13 @@
+# Personal learning context (Devpost Learn Skill Pack keeps this out of commits)
+/devpost/learner-profile.md
+
+# Local credentials — never commit real keys
+.env
+.env.*
+!.env.example
+
+# Dependencies and OS noise
+node_modules/
+npm-debug.log*
+.DS_Store
+Thumbs.db
