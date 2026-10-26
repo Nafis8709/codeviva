@@ -1,0 +1,21 @@
+{
+  "name": "codeviva",
+  "version": "1.0.0",
+  "description": "An AI viva examiner that questions you about the exact lines of code you shipped.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18.17"
+  },
+  "keywords": ["viva", "education", "code-review", "gemini", "devpost", "hackathon"],
+  "author": "Nafis Ahmed",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2"
+  }
+}

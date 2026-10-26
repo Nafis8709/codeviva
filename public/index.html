@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CodeViva — defend the code you shipped</title>
+  <meta name="description" content="An AI viva examiner that questions you about the exact lines of code you shipped.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23F5F0E6'/%3E%3Cpath d='M9 22c3-9 7-13 14-13' stroke='%23C0392B' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3Cpath d='M8 12l4 4-4 4' stroke='%231C2A3F' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Hind+Siliguri:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="wordmark" href="/" aria-label="CodeViva home">
+      Code<span>Viva</span>
+    </a>
+    <span class="status-pill" id="status-pill" title="Which examiner is answering">Connecting…</span>
+  </header>
+
+  <main>
+    <!-- ============================ SETUP ============================ -->
+    <section id="screen-setup" class="screen">
+      <div class="paper setup-card">
+        <p class="eyebrow">Mock viva · line by line</p>
+        <h1>Can you defend your code?</h1>
+        <p class="lede">
+          Load your project. The examiner questions you on the <em>exact lines</em> you wrote — or your AI agent wrote —
+          and shows you what you can't explain yet, before the real viva does.
+        </p>
+
+        <div class="demo-notice" id="demo-notice" hidden>
+          <strong>Demo mode.</strong> No API key is set, so a scripted examiner (no AI) runs instead. It is fully scripted for the
+          sample project. Add a free Gemini key to <code>.env</code> to examine your own code properly.
+        </div>
+
+        <div class="step">
+          <h2><span class="step-no">1</span> Load the code you'll be examined on</h2>
+          <label class="dropzone" id="dropzone" for="file-input">
+            <input type="file" id="file-input" multiple>
+            <span class="dropzone-title">Drop code files here</span>
+            <span class="dropzone-sub">or <u>choose files</u> · .c .cpp .java .py .js .ts and more · up to 60,000 characters</span>
+          </label>
+
+          <div class="load-row">
+            <button type="button" class="btn btn-ghost" id="sample-btn">
+              Try the sample project <span class="muted">(C · bank token queue)</span>
+            </button>
+            <details class="paste">
+              <summary>Paste a snippet instead</summary>
+              <input type="text" id="paste-name" placeholder="File name, e.g. main.cpp" value="pasted-code.txt" aria-label="Name for pasted code">
+              <textarea id="paste-box" rows="7" spellcheck="false" placeholder="Paste code here…" aria-label="Pasted code"></textarea>
+              <button type="button" class="btn btn-small" id="paste-add">Add pasted code</button>
+            </details>
+          </div>
+
+          <ul class="file-list" id="file-list" aria-live="polite"></ul>
+          <p class="notice" id="load-notice" hidden></p>
+        </div>
+
+        <div class="step">
+          <h2><span class="step-no">2</span> Set up your examiner</h2>
+          <div class="settings">
+            <fieldset class="segmented">
+              <legend>Language</legend>
+              <label><input type="radio" name="language" value="en" checked><span>English</span></label>
+              <label><input type="radio" name="language" value="bn"><span class="bn">বাংলা</span></label>
+            </fieldset>
+            <fieldset class="segmented">
+              <legend>Examiner</legend>
+              <label><input type="radio" name="style" value="friendly" checked><span>Friendly TA</span></label>
+              <label><input type="radio" name="style" value="strict"><span>Strict external</span></label>
+            </fieldset>
+            <fieldset class="segmented">
+              <legend>Length</legend>
+              <label><input type="radio" name="total" value="3"><span>3 questions</span></label>
+              <label><input type="radio" name="total" value="5" checked><span>5 questions</span></label>
+            </fieldset>
+          </div>
+        </div>
+
+        <div class="start-row">
+          <button type="button" class="btn btn-primary" id="start-btn" disabled>Start viva</button>
+          <p class="privacy">Your code is sent only to the configured examiner for this session. Nothing is stored.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ VIVA ============================ -->
+    <section id="screen-viva" class="screen" hidden>
+      <div class="viva-bar">
+        <div>
+          <span class="progress-label" id="progress-label">Question 1 of 5</span>
+          <span class="progress-topic" id="progress-topic"></span>
+        </div>
+        <div class="progress-dots" id="progress-dots" aria-hidden="true"></div>
+        <button type="button" class="btn btn-ghost btn-small" id="quit-btn" data-i18n="quit">End viva</button>
+      </div>
+
+      <div class="viva-grid">
+        <div class="paper code-panel">
+          <div class="file-tabs" id="viva-tabs" role="tablist"></div>
+          <div class="code-view" id="viva-code" tabindex="0" aria-label="Your code"></div>
+          <div class="legend">
+            <span><i class="sw sw-current"></i><span data-i18n="legendNow">being asked</span></span>
+            <span><i class="sw sw-solid"></i><span data-i18n="legendSolid">solid</span></span>
+            <span><i class="sw sw-partial"></i><span data-i18n="legendPartial">partial</span></span>
+            <span><i class="sw sw-gap"></i><span data-i18n="legendGap">gap</span></span>
+          </div>
+        </div>
+
+        <div class="paper exam-panel">
+          <ol class="transcript" id="transcript" aria-live="polite"></ol>
+
+          <div class="thinking" id="thinking" hidden>
+            <span class="pen-dot"></span><span id="thinking-text">The examiner is reading your code…</span>
+          </div>
+
+          <div class="error-banner" id="error-banner" role="alert" hidden>
+            <span id="error-text"></span>
+            <button type="button" class="btn btn-small" id="retry-btn" data-i18n="retry">Retry</button>
+          </div>
+
+          <form class="composer" id="composer" autocomplete="off">
+            <label for="answer-box" class="sr-only">Your answer</label>
+            <textarea id="answer-box" rows="4" placeholder="Answer as you would in the viva…"></textarea>
+            <div class="composer-row">
+              <button type="button" class="btn btn-icon" id="mic-btn" hidden aria-pressed="false" title="Answer by voice">
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                <span id="mic-label" data-i18n="speak">Speak</span>
+              </button>
+              <button type="button" class="btn btn-ghost" id="dontknow-btn" data-i18n="dontKnow">I don't know — teach me</button>
+              <button type="submit" class="btn btn-primary" id="submit-btn" data-i18n="submit">Submit answer</button>
+            </div>
+            <p class="hint" data-i18n="hint">Ctrl + Enter to submit</p>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ REPORT ============================ -->
+    <section id="screen-report" class="screen" hidden>
+      <div class="paper report-head">
+        <div class="score-mark" aria-label="Ownership score">
+          <svg viewBox="0 0 140 120" aria-hidden="true">
+            <path d="M70 8 C 118 6, 134 40, 128 66 C 121 100, 84 114, 56 110 C 22 105, 6 78, 12 50 C 18 24, 42 10, 78 12" fill="none" stroke="var(--red)" stroke-width="3.5" stroke-linecap="round"/>
+          </svg>
+          <span class="score-number" id="score-number">0</span>
+          <span class="score-out">/100</span>
+        </div>
+        <div class="report-title">
+          <p class="eyebrow" data-i18n="reportEyebrow">Viva report · ownership score</p>
+          <h1 id="report-headline">Viva report</h1>
+          <p class="lede" id="report-summary"></p>
+          <div class="report-actions">
+            <button type="button" class="btn btn-primary" id="copy-btn" data-i18n="copy">Copy as Markdown</button>
+            <button type="button" class="btn btn-ghost" id="restart-btn" data-i18n="restart">New viva</button>
+            <span class="copied" id="copied" hidden data-i18n="copied">Copied</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="report-grid">
+        <div class="paper code-panel">
+          <h2 class="panel-title" data-i18n="heatmap">Ownership heatmap</h2>
+          <div class="file-tabs" id="report-tabs" role="tablist"></div>
+          <div class="code-view" id="report-code" tabindex="0" aria-label="Your code, coloured by how well you defended it"></div>
+          <div class="legend">
+            <span><i class="sw sw-solid"></i><span data-i18n="legendSolid">solid</span></span>
+            <span><i class="sw sw-partial"></i><span data-i18n="legendPartial">partial</span></span>
+            <span><i class="sw sw-gap"></i><span data-i18n="legendGap">gap</span></span>
+          </div>
+        </div>
+
+        <div class="paper report-lists">
+          <h2 data-i18n="owns">What you clearly own</h2>
+          <ul id="strengths-list" class="plain-list"></ul>
+          <h2 data-i18n="gaps">What you couldn't defend yet</h2>
+          <ul id="gaps-list" class="plain-list gap-links"></ul>
+          <h2 data-i18n="revise">Revise before the real viva</h2>
+          <ol id="revise-list" class="revise-list"></ol>
+          <h2 data-i18n="transcript">The full viva</h2>
+          <div id="report-transcript"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    CodeViva · built for the Devpost <em>Build With AI: Basics</em> hackathon · MIT licensed
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
