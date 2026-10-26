@@ -102,7 +102,7 @@ The project followed the pack's six skills, and the planning documents are in th
 | `5-build` — verified, committed slices and revisions | [`devpost/checklist.md`](devpost/checklist.md) |
 | `5-build` — app map of the finished code | [`devpost/app-map.html`](devpost/app-map.html) |
 
-The skills themselves are installed in `.agents/skills/` (linked from `.claude/skills/`), pinned in `skills-lock.json`. Each planning document starts with a process note about how it was produced.
+The skills themselves are installed in `.agents/skills/` (with a copy in `.claude/skills/` for Claude Code), pinned in `skills-lock.json`. Each planning document starts with a process note about how it was produced.
 
 ## Limitations
 
