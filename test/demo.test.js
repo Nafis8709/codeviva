@@ -73,9 +73,9 @@ test("I don't know returns a gap with the model answer", async () => {
   assert.ok(result.modelAnswer.length > 50);
 });
 
-test('Bangla settings return Bangla questions', async () => {
-  const question = await demo.askQuestion({ files, settings: { ...settings, language: 'bn' }, history: [] });
-  assert.match(question.text, /[ঀ-৿]/);
+test('the demo examiner is English-only whatever language is chosen', async () => {
+  const question = await demo.askQuestion({ files, settings: { ...settings, language: 'es' }, history: [] });
+  assert.equal(question.text, demo.SAMPLE_SCRIPT[0].question.en);
 });
 
 test('generic code gets questions about real functions and loops', async () => {

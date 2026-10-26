@@ -18,7 +18,6 @@
   --font-head: 'Fraunces', Georgia, 'Times New Roman', serif;
   --font-ui: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-code: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
-  --font-bn: 'Hind Siliguri', 'Noto Sans Bengali', 'Nirmala UI', sans-serif;
 
   --radius: 6px;
   --shadow: 0 1px 0 rgba(28, 42, 63, 0.04), 0 8px 24px -12px rgba(28, 42, 63, 0.18);
@@ -37,14 +36,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-body.lang-bn .examiner-text,
-body.lang-bn .feedback,
-body.lang-bn .lede,
-body.lang-bn .plain-list,
-body.lang-bn .revise-list,
-.bn {
-  font-family: var(--font-bn), var(--font-ui);
-}
 
 [hidden] { display: none !important; }
 
@@ -266,6 +257,15 @@ h2 {
 .segmented label:last-of-type span { border-radius: 0 var(--radius) var(--radius) 0; }
 .segmented input:checked + span { background: var(--ink); color: var(--paper-raised); border-color: var(--ink); }
 .segmented input:focus-visible + span { outline: 2px solid var(--red); outline-offset: 2px; }
+
+.select-field { display: flex; flex-direction: column; }
+.select-field label { font-size: 0.8rem; color: var(--ink-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.08em; }
+.select-field select {
+  font: inherit; font-size: 0.92rem; padding: 7px 10px; min-width: 170px;
+  border: 1px solid var(--rule-strong); border-radius: var(--radius); background: #fff; color: var(--ink);
+}
+.select-field select:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+.setting-note { font-size: 0.86rem; color: var(--ink-muted); margin: 12px 0 0; }
 
 .start-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: 32px; }
 .privacy { font-size: 0.84rem; color: var(--ink-muted); margin: 0; }

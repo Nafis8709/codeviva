@@ -45,9 +45,12 @@ test('the prompt sends numbered code and forbids repeating examined lines', () =
   assert.match(prompt.user, /question 2 of 5/);
 });
 
-test('Bangla setting asks the model to answer in Bangla', () => {
-  const prompt = gradePrompt({ files, settings: { ...settings, language: 'bn' }, history: [], question: { id: 'q1', text: 'Q', file: 'src/list.c', startLine: 1, endLine: 2 }, answer: 'A', dontKnow: false, followUpAllowed: true });
-  assert.match(prompt.system, /Bangla/);
+test('the chosen language reaches the model; unknown codes fall back to English', () => {
+  const question = { id: 'q1', text: 'Q', file: 'src/list.c', startLine: 1, endLine: 2 };
+  const spanish = gradePrompt({ files, settings: { ...settings, language: 'es' }, history: [], question, answer: 'A', dontKnow: false, followUpAllowed: true });
+  assert.match(spanish.system, /in Spanish/);
+  const unknown = gradePrompt({ files, settings: { ...settings, language: 'xx' }, history: [], question, answer: 'A', dontKnow: false, followUpAllowed: true });
+  assert.match(unknown.system, /simple English/);
 });
 
 test('the score decides the verdict, and follow-ups only appear for partial answers', async () => {

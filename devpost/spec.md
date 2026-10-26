@@ -48,7 +48,7 @@ PRD ref: `prd.md > The Core Journey`.
 ## Look and Feel
 Carried from `prd.md > Look and Feel`.
 - CSS custom properties: paper `#F5F0E6`, paper-raised `#FBF8F2`, ink `#1C2A3F`, muted ink `#5B6577`, rule line `#E2D9C8`, red pen `#C0392B`, partial amber `#C98A1B`, solid green `#2E7D4F`, highlight wash `#FFF1C9`.
-- Fonts (Google Fonts with system fallbacks): **Fraunces** for headings, **IBM Plex Sans** for UI, **IBM Plex Mono** for code, **Hind Siliguri** for Bangla text.
+- Fonts (Google Fonts with system fallbacks): **Fraunces** for headings, **IBM Plex Sans** for UI, **IBM Plex Mono** for code; non-Latin examiner text uses system fonts and is marked with `lang`/`dir="auto"` so scripts such as Arabic render correctly.
 - Examiner turns styled as margin notes with a thin red left rule; student answers as handwritten-feeling indented blocks (serif italic). Verdict stamps: small uppercase bordered labels.
 - Score drawn as a hand-circled number in red (SVG circle with slight rotation).
 - Spacious, calm. Works down to phone width (columns stack).
@@ -97,7 +97,7 @@ One HTML file with three `<section>` screens toggled by `hidden`. `app.js` holds
 PRD ref: `prd.md > Screens and Layout`, all of `prd.md > Features and Behavior`.
 
 ### Sample project (`public/samples/`)
-`token_queue.h` + `token_queue.c` — a bank token queue in C with priority customers, wait estimation, and cleanup: realistic SPL-style code with genuine viva-worthy spots (tail reset on empty dequeue, priority insertion loop, integer division, `scanf` validation, freeing remaining nodes).
+`token_queue.h` + `token_queue.c` — a bank token queue in C with priority customers, wait estimation, and cleanup: a classic data-structures assignment with genuine viva-worthy spots (tail reset on empty dequeue, priority insertion loop, integer division, `scanf` validation, freeing remaining nodes).
 
 ## Data Model
 All in the browser tab (`state` in `app.js`); nothing persists after refresh — by design (`prd.md > States and Boundaries`).
@@ -160,6 +160,6 @@ codeviva/
 ## Decisions and Open Issues
 - **Stateless server + client-held history** (agent recommendation, accepted by delegation) — simplest correct design; tradeoff: every request resends the code (fine at ≤ 60 KB).
 - **Score computed on the server, not by the AI** — a number the student can trust and reproduce; the AI writes only the narrative.
-- **Gemini default, OpenAI-compatible optional** — free tier available in Bangladesh; the alternative protects against model/region changes.
+- **Gemini default, OpenAI-compatible optional** — a free tier most students can get; the alternative protects against model or regional availability changes.
 - **Genuine uncertainty:** will a small free-tier model reliably return correct line numbers? Clarified by design: the code is sent with explicit line numbers and every reply is clamped/validated by `clampRange`; checked in tests with deliberately wrong ranges, and in the first live run with a real key.
 - Open: confirm the default model name works on the learner's key during the first live run; change `GEMINI_MODEL` if not.

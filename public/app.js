@@ -21,7 +21,8 @@ const state = {
 };
 
 // ---------------------------------------------------------------------------
-// Interface text (examiner text itself comes from the server)
+// Interface text. The interface stays in English; the examiner's own text
+// comes from the server in the language the student chose.
 // ---------------------------------------------------------------------------
 const STRINGS = {
   en: {
@@ -38,26 +39,17 @@ const STRINGS = {
     headlineHigh: 'You own this code.', headlineMid: 'You own most of this code.', headlineLow: 'Some of this code still owns you.',
     jump: 'show lines', quitConfirm: 'End the viva now and see the report for the questions answered so far?',
   },
-  bn: {
-    quit: 'ভাইভা শেষ', legendNow: 'এখন জিজ্ঞাসা', legendSolid: 'ঠিক', legendPartial: 'আংশিক', legendGap: 'ঘাটতি',
-    retry: 'আবার চেষ্টা', speak: 'বলুন', listening: 'শুনছি… থামাতে চাপুন', dontKnow: 'জানি না — শিখিয়ে দিন',
-    submit: 'উত্তর জমা দিন', hint: 'জমা দিতে Ctrl + Enter', reportEyebrow: 'ভাইভা রিপোর্ট · ownership score',
-    copy: 'Markdown কপি করুন', restart: 'নতুন ভাইভা', copied: 'কপি হয়েছে', heatmap: 'Ownership heatmap',
-    owns: 'যা আপনি ভালো বোঝেন', gaps: 'যা এখনো ব্যাখ্যা করতে পারেননি', revise: 'আসল ভাইভার আগে যা দেখবেন',
-    transcript: 'পুরো ভাইভা', question: 'প্রশ্ন', of: '/', followUp: 'ফলো-আপ', lines: 'লাইন', line: 'লাইন',
-    reading: 'পরীক্ষক আপনার কোড পড়ছেন…', grading: 'পরীক্ষক আপনার উত্তর মূল্যায়ন করছেন…',
-    writingReport: 'পরীক্ষক রিপোর্ট লিখছেন…', placeholder: 'ভাইভায় যেভাবে বলতেন সেভাবে উত্তর দিন…',
-    dontKnowAnswer: '(জানি না — শিখিয়ে দিন)', showAnswer: 'সঠিক উত্তর দেখুন', nothingSolid: 'এখনো পুরোপুরি ঠিক কিছু নেই — অনুশীলন এজন্যই।',
-    nothingGaps: 'কোনো ঘাটতি পাওয়া যায়নি। চমৎকার।', examiner: 'পরীক্ষক', yourAnswer: 'আপনার উত্তর', feedbackLabel: 'মন্তব্য',
-    headlineHigh: 'এই কোড আপনার নিজের।', headlineMid: 'এই কোডের বেশিরভাগই আপনি বোঝেন।', headlineLow: 'এই কোডের কিছু অংশ এখনো আপনার নিয়ন্ত্রণে নেই।',
-    jump: 'লাইন দেখুন', quitConfirm: 'এখনই ভাইভা শেষ করে এ পর্যন্ত উত্তরগুলোর রিপোর্ট দেখবেন?',
-  },
 };
 
 function t(key) {
-  const table = STRINGS[state.settings.language] || STRINGS.en;
-  return table[key] || STRINGS.en[key] || key;
+  return STRINGS.en[key] || key;
 }
+
+// Browser speech-recognition locale for each examiner language.
+const SPEECH_LOCALES = {
+  en: 'en-US', es: 'es-ES', pt: 'pt-BR', fr: 'fr-FR', de: 'de-DE',
+  hi: 'hi-IN', ar: 'ar-SA', zh: 'zh-CN', id: 'id-ID', bn: 'bn-BD',
+};
 
 // ---------------------------------------------------------------------------
 // Small DOM helpers
@@ -89,6 +81,10 @@ function richText(tag, className, text) {
       node.appendChild(document.createTextNode(part));
     }
   });
+  // Examiner and student text is in the chosen language: tell the browser,
+  // so fonts and right-to-left scripts (Arabic) render correctly.
+  node.lang = state.settings.language;
+  node.dir = 'auto';
   return node;
 }
 
@@ -104,11 +100,9 @@ function showScreen(name) {
 }
 
 function applyLanguage() {
-  document.body.classList.toggle('lang-bn', state.settings.language === 'bn');
-  document.querySelectorAll('[data-i18n]').forEach((node) => {
-    node.textContent = t(node.dataset.i18n);
-  });
-  $('answer-box').placeholder = t('placeholder');
+  // The answer box takes the examiner's language too.
+  $('answer-box').lang = state.settings.language;
+  $('answer-box').dir = 'auto';
 }
 
 // ---------------------------------------------------------------------------
@@ -255,7 +249,7 @@ function renderFileList() {
 
 function readSettings() {
   state.settings = {
-    language: document.querySelector('input[name="language"]:checked').value,
+    language: $('language').value,
     style: document.querySelector('input[name="style"]:checked').value,
     totalQuestions: Number(document.querySelector('input[name="total"]:checked').value),
   };
@@ -422,6 +416,7 @@ function renderQuestionTurn(question) {
 
 function renderAnswerTurn(turn) {
   const answer = el('li', `turn-answer${turn.dontKnow ? ' is-dontknow' : ''}`, turn.dontKnow ? t('dontKnowAnswer') : turn.answer);
+  answer.dir = 'auto';
   $('transcript').appendChild(answer);
 
   const grade = el('li', 'turn-grade');
@@ -736,7 +731,7 @@ function toggleListening() {
     return;
   }
   recognition = new SpeechRecognitionImpl();
-  recognition.lang = state.settings.language === 'bn' ? 'bn-BD' : 'en-US';
+  recognition.lang = SPEECH_LOCALES[state.settings.language] || 'en-US';
   recognition.continuous = true;
   recognition.interimResults = true;
   answerBeforeSpeech = $('answer-box').value.trim();

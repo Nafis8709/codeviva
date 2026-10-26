@@ -7,13 +7,13 @@ status: approved
 
 # CodeViva — Product Requirements
 
-An AI viva examiner for students who need to defend code they shipped, starting with Bangladeshi software engineering students preparing for project vivas.
+An AI viva examiner for students and junior developers who have to defend code they shipped — in a viva, a project defense, a code review or a job interview.
 Source: `scope.md > Who It's For`, `scope.md > The Unique Kernel`.
 
 ## The Core Journey
 1. The student opens CodeViva and lands on the **Setup screen**.
 2. They load code: drag files onto the drop zone, pick files, paste a snippet, or click **Try the sample project**. Loaded files appear as a list with line counts.
-3. They choose examiner language (English / বাংলা), style (Friendly TA / Strict external), and length (3 or 5 questions), then press **Start viva**.
+3. They choose examiner style (Friendly TA / Strict external), length (3 or 5 questions) and, optionally, the language to be examined in (English by default), then press **Start viva**.
 4. The **Viva screen** opens: code on the left, examiner conversation on the right. The examiner's first question appears, and the code panel switches to the referenced file and highlights the referenced lines.
 5. The student answers by typing or by holding the mic button and speaking, then presses **Submit answer**. Or presses **I don't know — teach me**.
 6. The examiner marks the answer **Solid**, **Partial**, or **Gap**, shows one or two lines of feedback, and the gutter next to the examined lines takes that colour.
@@ -31,7 +31,7 @@ Success = the student knows, line by line, what they can't yet explain.
 ## Look and Feel
 - Exam-hall paper: warm off-white paper background, deep ink-navy text, ruled-line accents.
 - The examiner's **red pen** is the accent colour (gaps, score circle); amber for partial; green for solid.
-- Serif headings (academic, a little old-fashioned), clean sans for UI text, monospace for code. Bangla text uses a proper Bengali font.
+- Serif headings (academic, a little old-fashioned), clean sans for UI text, monospace for code. The interface is in English; examiner text in other scripts uses the system's fonts, right-to-left where needed.
 - Calm, serious, minimal. No purple gradients, no emoji confetti, no chatbot bubbles with avatars — examiner turns look like margin notes on an exam script.
 - Copy tone: direct, examiner-like, never mocking ("Partial — you named the loop, but not why it stops at `n-1`.").
 
@@ -39,7 +39,7 @@ Success = the student knows, line by line, what they can't yet explain.
 
 ### Loading Code
 - Accepts multiple text/code files (`.c .cpp .h .java .py .js .ts .cs .go .rb .php .kt .swift .sql .html .css` and similar) via picker or drag-drop, plus a paste box (named "pasted-code").
-- **Try the sample project** loads a bundled two-file C project (a bank token queue) that students would recognise from SPL.
+- **Try the sample project** loads a bundled two-file C project (a bank token queue) — a classic data-structures assignment students anywhere would recognise.
 - Shows each file with its line count; a file can be removed.
 - [ ] Dropping two `.c` files lists both with correct line counts.
 - [ ] Clicking the sample button lists the sample files immediately.
@@ -70,7 +70,7 @@ Success = the student knows, line by line, what they can't yet explain.
 - [ ] After the last answer, the report appears with a score and a coloured heatmap.
 
 ### Examiner Language and Style
-- English or বাংলা for questions, feedback, and report (code identifiers stay in English).
+- English by default. Non-native speakers can pick another language (Spanish, Portuguese, French, German, Hindi, Arabic, Chinese, Indonesian, Bengali) for questions, feedback and report; code identifiers stay as written. Needs the AI examiner — demo mode is English only.
 - Friendly TA = encouraging, hints allowed; Strict external = terse, no hints, harsher partial credit.
 
 ## States and Boundaries
@@ -86,7 +86,7 @@ Success = the student knows, line by line, what they can't yet explain.
 ## Product Decisions
 All agent-proposed under delegation; learner to confirm.
 - Line-anchored questions + adaptive follow-ups are the kernel — they're what make this different from a generic quiz.
-- Bangla support from day one — vivas in Bangladesh are bilingual; also signals a real audience.
+- International audience, English first — the judges and the users are global. A language choice is offered for non-native English speakers, who are a large share of CS students and are often judged on fluency instead of understanding. (Revised after learner feedback: the first version was framed around one university course and Bangla.)
 - Follow-ups limited to one per question — keeps sessions short enough to demo and avoids frustration loops.
 - Score for a question with a follow-up = the better of the two attempts — rewards recovering under questioning, as real examiners do.
 - Demo mode is honest and labelled — judges and students without a key can still see the full journey.

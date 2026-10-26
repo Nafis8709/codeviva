@@ -8,21 +8,23 @@ Built for the Devpost [Build With AI: Basics](https://learn-ai-basics.devpost.co
 
 ## The problem
 
-In many universities — including ours in Bangladesh — a software project ends in a **viva**: an examiner points at your code and asks *"why is this here?"*, *"what happens if the list is empty?"*. More and more of that code is written with AI coding agents. It works, but the student often can't explain it. Re-reading your own code the night before doesn't tell you what you *can't* explain, and a friend quizzing you doesn't know your code.
+Sooner or later, someone points at your code and asks *"why is this here?"* or *"what happens if the list is empty?"* — an examiner in a project **viva** or defense, a TA at a demo, a senior engineer in a code review, an interviewer saying *"walk me through your project"*.
+
+More and more of that code is written with AI coding agents. It works, but the person who shipped it often can't explain it. Re-reading your code the night before doesn't tell you what you *can't* explain, and a friend quizzing you doesn't know your code.
 
 ## What CodeViva does
 
-1. **Load your project** — drag in files, paste a snippet, or try the bundled sample (a C bank-token queue, typical of a first software project lab).
+1. **Load your project** — drag in files, paste a snippet, or try the bundled sample (a C bank-token queue, a classic data-structures assignment).
 2. **The examiner asks about specific lines** — the code panel jumps to and highlights them. Questions target what real examiners ask: edge cases, design choices, memory handling, complexity.
 3. **Answer by typing or speaking** — or press *I don't know — teach me*.
 4. **Every answer is marked** *Solid / Partial / Gap* with feedback and a model answer. **Shallow answers get one pointed follow-up**, like an examiner pushing back.
 5. **The report** gives an ownership score out of 100 and an **ownership heatmap**: your code with each examined region coloured by how well you defended it, plus three concrete things to revise.
 
-The examiner speaks **English or বাংলা**, and can be a *Friendly TA* or a *Strict external*.
+The examiner can be a *Friendly TA* or a *Strict external*. It speaks English by default; **non-native English speakers can choose to be examined in their own language** (10 languages, AI mode), so they're judged on understanding, not fluency.
 
-| Report with ownership heatmap | Bangla, phone width |
+| Report with ownership heatmap | Phone width |
 |---|---|
-| ![Report: score 72/100, red and green regions on the code](docs/screenshots/report-heatmap.png) | ![Bangla examiner on a phone](docs/screenshots/bangla-mobile.png) |
+| ![Report: score 72/100, red and green regions on the code](docs/screenshots/report-heatmap.png) | ![CodeViva viva screen on a phone](docs/screenshots/mobile.png) |
 
 ## Quick start
 
@@ -106,6 +108,7 @@ The skills themselves are installed in `.agents/skills/` (with a copy in `.claud
 
 ## Limitations
 
+- Demo mode (no key) is English only; other examiner languages need the AI examiner.
 - Voice answers use the browser's speech recognition (best in Chrome/Edge); the mic button is hidden where unsupported.
 - Up to 60,000 characters of code per viva — load the files your viva covers, not the whole repo.
 - Small free-tier models can occasionally pick a slightly off line range; the server clamps it to real lines, and you can always click the line reference to jump.

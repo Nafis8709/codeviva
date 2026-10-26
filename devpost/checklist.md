@@ -40,23 +40,23 @@ Build mode: fast — chosen by the agent under the learner's delegation and the 
   Commit: `Add viva report with ownership score and heatmap`
 
 - [x] **4. A real AI examiner (Gemini or OpenAI-compatible) asks, grades and reports on any code**
-  Becomes usable: With `GEMINI_API_KEY` in `.env`, questions/grades/reports come from the model, in English or Bangla, friendly or strict, for any loaded files.
+  Becomes usable: With `GEMINI_API_KEY` in `.env`, questions/grades/reports come from the model, in the chosen language, friendly or strict, for any loaded files.
   Why now: Highest external risk, but it slots into the interfaces the demo examiner already proved.
   PRD ref: `prd.md > Asking Line-Anchored Questions`, `prd.md > Grading and Follow-ups`, `prd.md > Examiner Language and Style`
   Spec ref: `spec.md > Prompts (src/prompts.js)`, `spec.md > AI clients (src/llm/gemini.js, src/llm/openaiCompatible.js)`, `spec.md > AI examiner (src/examiners/aiExaminer.js)`, `spec.md > Config (src/config.js)`, `spec.md > External Services and Dependencies`
   Build: prompts, two LLM clients, extractJson, AI examiner with validation, config switch.
   Verify (mechanical): Tests run the AI examiner against a fake LLM returning messy JSON and out-of-range lines and assert the normalised output; live-key test is a learner step (no outbound access to the AI host from the build sandbox).
-  Learner check: Put your Gemini key in `.env`, restart, load one of your own SPL files, and check the questions are about your actual lines.
+  Learner check: Put your Gemini key in `.env`, restart, load one of your own project files, and check the questions are about your actual lines.
   Commit: `Add Gemini and OpenAI-compatible AI examiner`
 
-- [x] **5. Real-world inputs: drag-drop and paste, Bangla, voice answers, errors and edge states**
-  Becomes usable: Own files via picker/drag-drop/paste, size and binary checks, Bangla UI strings, mic answers, readable errors with Retry, mobile layout.
+- [x] **5. Real-world inputs: drag-drop and paste, examiner language, voice answers, errors and edge states**
+  Becomes usable: Own files via picker/drag-drop/paste, size and binary checks, examiner language choice, mic answers, readable errors with Retry, mobile layout.
   Why now: Turns the working core into a coherent product experience (Design criterion) without touching the kernel.
   PRD ref: `prd.md > Loading Code`, `prd.md > Answering`, `prd.md > States and Boundaries`, `prd.md > Look and Feel`
   Spec ref: `spec.md > Page (public/index.html, public/styles.css, public/app.js)`, `spec.md > Important Failure Modes`
-  Build: file reading, paste box, validations, speech recognition, error banner with retry, responsive CSS, Bangla demo strings.
-  Verify (mechanical): Tests for oversized/invalid uploads (HTTP 400); headless browser run in Bangla and at phone width with screenshots; console free of errors.
-  Learner check: Drag in two of your own files, switch to বাংলা, answer one question by voice, and resize the window to phone width.
+  Build: file reading, paste box, validations, speech recognition, error banner with retry, responsive CSS.
+  Verify (mechanical): Tests for oversized/invalid uploads (HTTP 400); headless browser run with a non-English examiner and at phone width with screenshots; console free of errors.
+  Learner check: Drag in two of your own files, pick another examiner language, answer one question by voice, and resize the window to phone width.
   Commit: `Handle own files, Bangla, voice answers and error states`
 
 ## Hands-on Checkpoints
@@ -87,3 +87,4 @@ Activity mode: static reference map; live walkthrough pending with the learner.
 - Report strengths/gaps are now derived from the marked answers instead of written by the model — guarantees the lists match the heatmap; the model writes only the summary and revision plan (`spec.md > AI examiner` behaviour unchanged for the learner).
 - The build sandbox cannot reach the Gemini host, so slice 4 is verified with a mocked `fetch` (request shape, header auth, error mapping) and a fake model (repairs bad file names/line ranges, score-driven verdicts). First live-key run is a learner step.
 - Code-panel scrolling measured line offsets from the wrong ancestor at phone width (highlight off-screen); `.code-view` is now the positioned container. Found by the 390 px headless-browser run.
+- Reframed for an international audience after learner feedback — the first version was built around the learner's own university course (SPL) and offered only English/Bangla. Now: global audience in scope/PRD, English-only interface, an optional examiner-language dropdown (10 languages, AI mode) with `lang`/`dir="auto"` on examiner text, and an English-only demo examiner. The kernel is unchanged.

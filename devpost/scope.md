@@ -3,7 +3,7 @@ doc: scope
 status: approved
 ---
 
-> **Process note (honest provenance).** The learner delegated idea selection and planning decisions to the agent ("i fully trust you… build a winnable project") with ~10 hours left before the deadline. The agent followed the `2-scope` structure but proposed the idea itself instead of running the flipped-interaction interview. Approval below is by that explicit delegation; the learner reviews this file before publishing.
+> **Process note (honest provenance).** The learner delegated idea selection and planning decisions to the agent ("i fully trust you… build a winnable project") with ~10 hours left before the deadline. The agent followed the `2-scope` structure but proposed the idea itself instead of running the flipped-interaction interview. Approval below is by that explicit delegation. After reviewing the first version, the learner asked for an international audience rather than one tied to their own university course and to Bangla; this version reflects that.
 
 # CodeViva
 
@@ -15,9 +15,9 @@ Every question is **anchored to specific lines of your own code** (they light up
 Generic quiz apps ask textbook questions. CodeViva asks "Line 42 — why `<=` and not `<`? What breaks if the queue is empty?"
 
 ## Who It's For
-A second-year software engineering student in Dhaka two days before their Software Project Lab (SPL) viva. Their project works, but parts were written with an AI coding agent or copied from tutorials, and they're not sure they can explain them. Today they re-read their code and hope; a friend might quiz them, but friends don't know the code.
+A computer-science student, anywhere, the week before they have to defend their project out loud — a viva or oral exam in much of Europe and Asia, a project demo or code walkthrough elsewhere. Their project works, but parts were written with an AI coding agent or adapted from tutorials, and they're not sure they can explain them. Today they re-read their code and hope; a friend might quiz them, but friends don't know the code.
 
-The same problem applies to any student or junior developer who ships AI-assisted code: the code works, the understanding is unverified.
+The same moment comes for bootcamp graduates and junior developers: "walk me through this code" in a job interview or a code review. Anyone who ships AI-assisted code has working code and unverified understanding.
 
 ## The Core Loop
 1. Load your project files (or a sample).
@@ -29,10 +29,10 @@ The same problem applies to any student or junior developer who ships AI-assiste
 People come back the night before each viva, and after each big AI-assisted change to their code.
 
 ## Inspiration & Identity
-The feel of a real exam: paper, ink, an examiner's red pen. Calm and serious, not a gamified chatbot. Bilingual — examiner can speak English or বাংলা, because Bangladeshi vivas actually happen in a mix of both.
+The feel of a real exam: paper, ink, an examiner's red pen. Calm and serious, not a gamified chatbot. English by default; non-native English speakers can choose to be examined in their own language.
 
 ## Why This Matters to the Learner
-The learner is a BSSE student at IIT, University of Dhaka; SPL projects end in a viva. Using AI agents to build (exactly what this hackathon teaches) makes "can you explain your own code?" the question that matters most.
+The learner is a software engineering student who has had to defend project code in person. Using AI agents to build — exactly what this hackathon teaches — makes "can you explain your own code?" the question that matters most, for every student and junior developer, not just in one country.
 
 ## What "Working" Looks Like
 Open the app → click "Try sample project" (or drop in your own files) → Start viva → the examiner highlights lines and asks a question → you give a half-right answer → it catches the gap and asks a pointed follow-up → after the last question, the report shows a score like **64/100**, and the code view turns into a heatmap with red on the lines you couldn't explain.
@@ -43,7 +43,7 @@ Open the app → click "Try sample project" (or drop in your own files) → Star
 - Load code by paste, file picker / drag-drop (text files), or bundled sample.
 - 3 or 5 question sessions, at most one follow-up per question.
 - Line-anchored questions, verdict + feedback per answer, "I don't know — teach me" option.
-- English or Bangla examiner; friendly or strict style.
+- Examiner in English by default, with a language choice for non-native speakers; friendly or strict style.
 - Optional voice answers via the browser's speech recognition.
 - Final report with score, heatmap, strengths, gaps, and a short revision list; copy as Markdown.
 - Works with a free Gemini API key; a clearly labelled demo mode (scripted examiner, no AI) when no key is set.

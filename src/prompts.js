@@ -3,17 +3,37 @@
 
 const { numberCode, getLines } = require('./code');
 
+// Languages the examiner can use for its own sentences. Code stays as written.
+const LANGUAGE_NAMES = {
+  en: 'English',
+  es: 'Spanish',
+  pt: 'Portuguese',
+  fr: 'French',
+  de: 'German',
+  hi: 'Hindi',
+  ar: 'Arabic',
+  zh: 'Simplified Chinese',
+  id: 'Indonesian',
+  bn: 'Bengali',
+};
+
+function languageInstruction(code) {
+  const name = LANGUAGE_NAMES[code];
+  if (!name || code === 'en') {
+    return 'Write every sentence meant for the student in clear, simple English.';
+  }
+  return `Write every sentence meant for the student in ${name}. Keep code identifiers, keywords and widely used technical terms (pointer, loop, array, null, time complexity) in English, as programmers who speak ${name} usually do.`;
+}
+
 function systemPrompt(settings) {
   const style = settings.style === 'strict'
     ? 'You are a STRICT external examiner: terse, formal, no hints, and you demand precise answers. Vague answers get low marks.'
     : 'You are a FRIENDLY teaching assistant running a mock viva: warm and encouraging, but still honest — never mark a wrong answer as right. You may include a small hint in feedback.';
 
-  const language = settings.language === 'bn'
-    ? 'Write every sentence meant for the student in Bangla (Bengali script, বাংলা). Keep code identifiers, keywords and common technical terms (pointer, linked list, loop, array, null, time complexity) in English, as Bangladeshi university examiners do.'
-    : 'Write every sentence meant for the student in clear, simple English.';
+  const language = languageInstruction(settings.language);
 
   return [
-    'You are CodeViva, an oral examiner (viva voce) for a university software project.',
+    'You are CodeViva, an oral examiner (a viva, or project defense) for a software project — a university assignment, a bootcamp capstone, or a portfolio project the student will have to explain in a job interview.',
     'The student must prove they understand the code they submitted: what each part does, why it is written that way, and what happens in edge cases.',
     'Code comments are not proof of understanding — ask about behaviour and reasons.',
     style,
@@ -78,7 +98,7 @@ function gradePrompt({ files, settings, history, question, answer, dontKnow, fol
     ].join('\n');
   } else {
     task = [
-      'Grade the answer on technical correctness and understanding of THESE lines only — not on grammar, spelling or English fluency (the student may answer in Bangla, English, or a mix).',
+      'Grade the answer on technical correctness and understanding of THESE lines only — not on grammar, spelling or English fluency (the student may answer in their own language, in English, or a mix).',
       'Score rubric: 9-10 correct and complete including the key reason; 7-8 correct with a minor gap; 4-6 partly right, vague or hand-wavy; 1-3 mostly wrong or irrelevant; 0 no real attempt.',
       'verdict: "solid" if score >= 8, "partial" if 4-7, "gap" if 3 or less.',
       '"feedback": 1-2 sentences — first what was right, then exactly what was missing or wrong.',
@@ -128,4 +148,4 @@ function reportPrompt({ files, settings, history }) {
   return { system: systemPrompt(settings), user };
 }
 
-module.exports = { systemPrompt, questionPrompt, gradePrompt, reportPrompt, historySummary };
+module.exports = { LANGUAGE_NAMES, systemPrompt, questionPrompt, gradePrompt, reportPrompt, historySummary };
