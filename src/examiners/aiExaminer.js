@@ -9,9 +9,9 @@
 
 const { clampRange } = require('../code');
 const { normaliseScore, normaliseStatus, scoreFromChecklist, verdictForScore } = require('../scoring');
-const { questionPrompt, keyPointsPrompt, gradePrompt, reportPrompt } = require('../prompts');
+const { questionPrompt, keyPointsPrompt, gradePrompt, reportPrompt, targetFor } = require('../prompts');
 const { LlmError } = require('../llm/extractJson');
-const { checkQuestion } = require('../grounding');
+const { checkQuestion, overlapShare } = require('../grounding');
 
 const FALLBACK_SCORE = { solid: 9, partial: 5, gap: 1 };
 const MAX_QUESTION_ATTEMPTS = 2;
@@ -103,14 +103,25 @@ function createAiExaminer(llm, options = {}) {
       lastReply = reply;
       lastText = text;
 
-      const check = checkQuestion(files, { ...reply, question: text }, history);
+      const target = targetFor(settings, history);
+      const options = target ? { lockedFile: target.file, nearRange: target, allowRepeat: true } : {};
+      const check = checkQuestion(files, { ...reply, question: text }, history, options);
       allProblems.push(...check.problems);
       if (check.status !== 'rejected') {
         let status = check.status;
+        let range = check.range;
+        if (target && overlapShare(range, target) === 0 && overlapShare(target, range) === 0) {
+          // A re-test question must stay on the region being re-tested.
+          allProblems.push(`moved back to the re-tested region ${target.file} lines ${target.startLine}-${target.endLine}`);
+          range = clampRange(files, target.file, target.startLine, target.endLine);
+          status = 'repaired';
+        }
         if (attempt > 1) {
           status = 'regenerated';
         }
-        return buildQuestion(number, reply, text, check.range, { status, attempts: attempt, problems: allProblems });
+        // A re-test keeps the earlier topic, so before -> after lines up.
+        const topicReply = target && target.topic ? { ...reply, topic: target.topic } : reply;
+        return buildQuestion(number, topicReply, text, range, { status, attempts: attempt, problems: allProblems });
       }
       rejection = check.problems.join('; ');
     }

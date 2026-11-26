@@ -202,7 +202,8 @@
           <h1 id="report-headline">Viva report</h1>
           <p class="lede" id="report-summary"></p>
           <div class="report-actions">
-            <button type="button" class="btn btn-primary" id="copy-btn" data-i18n="copy">Copy as Markdown</button>
+            <button type="button" class="btn btn-primary" id="retest-btn" hidden>Re-test my gaps</button>
+            <button type="button" class="btn btn-ghost" id="copy-btn" data-i18n="copy">Copy as Markdown</button>
             <button type="button" class="btn btn-ghost" id="restart-btn" data-i18n="restart">New viva</button>
             <span class="copied" id="copied" hidden data-i18n="copied">Copied</span>
           </div>
@@ -222,6 +223,11 @@
         </div>
 
         <div class="paper report-lists">
+          <div id="compare" hidden>
+            <h2>Before → after</h2>
+            <p class="compare-summary" id="compare-summary"></p>
+            <ul id="compare-list" class="plain-list compare-list"></ul>
+          </div>
           <h2 data-i18n="owns">What you clearly own</h2>
           <ul id="strengths-list" class="plain-list"></ul>
           <h2 data-i18n="gaps">What you couldn't defend yet</h2>

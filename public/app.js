@@ -15,6 +15,7 @@ const state = {
   current: null,             // the question being asked
   activeFile: { viva: null, report: null },
   report: null,
+  retest: null,              // { previousScore, regions } while re-testing earlier gaps
   status: null,
   busy: false,
   retryAction: null,
@@ -42,6 +43,9 @@ const STRINGS = {
     repoEmpty: 'No code files found here. Try a folder link (…/tree/main/src) or load files directly.',
     repoAdded: 'Loaded', from: 'from', branch: 'branch', filesWord: 'files', characters: 'characters', max: 'max',
     kind_test: 'test', kind_other: 'other',
+    retestButton: 'Re-test my gaps', retestLabel: 'Re-test',
+    retestEyebrow: 'Re-test report · score on the re-tested lines', retestFixed: 'You can now defend', retestOfYour: 'of your', retestGaps: 'gaps.',
+    compareRetested: 'Regions re-tested:', compareImproved: 'improved:', compareOnTheseLines: 'score on these lines:',
     resumeVivaTitle: 'You have an unfinished viva', resumeVivaButton: 'Resume',
     resumeReportTitle: 'Your last viva report', resumeReportButton: 'Open report', answeredWord: 'questions answered',
     answerKey: 'Answer key — what the examiner was listening for', wrongClaim: 'Not right:',
@@ -547,6 +551,9 @@ function renderProgress() {
   const question = state.current;
   const number = question ? questionNumber(question) : mainCount();
   let label = `${t('question')} ${number} ${t('of')} ${total}`;
+  if (state.retest) {
+    label = `${t('retestLabel')} · ${label}`;
+  }
   if (question && question.isFollowUp) {
     label += ` · ${t('followUp')}`;
   }
@@ -709,6 +716,106 @@ async function fetchNextQuestion() {
 
 async function startViva() {
   readSettings();
+  state.retest = null;
+  await beginViva();
+}
+
+// ---------------------------------------------------------------------------
+// Re-test: a short viva on only the regions the student could not defend,
+// then a before -> after comparison.
+// ---------------------------------------------------------------------------
+
+// Each examined region with its best attempt (a follow-up can recover it).
+function examinedRegions(history) {
+  const regions = [];
+  for (const turn of history) {
+    if (turn.isFollowUp) {
+      continue;
+    }
+    const followUp = history.find((t2) => t2.isFollowUp && t2.parentId === turn.id);
+    const best = followUp && followUp.score > turn.score ? followUp : turn;
+    regions.push({ file: turn.file, startLine: turn.startLine, endLine: turn.endLine, topic: turn.topic, question: turn.text, verdict: best.verdict, score: best.score });
+  }
+  return regions;
+}
+
+function gapRegions() {
+  return examinedRegions(state.history).filter((region) => region.verdict !== 'solid').slice(0, 5);
+}
+
+async function startRetest() {
+  const gaps = gapRegions();
+  if (gaps.length === 0) {
+    return;
+  }
+  state.retest = {
+    previousScore: state.report ? state.report.score : null,
+    regions: gaps,
+  };
+  state.settings = {
+    ...state.settings,
+    totalQuestions: gaps.length,
+    targets: gaps.map((gap) => ({ file: gap.file, startLine: gap.startLine, endLine: gap.endLine, topic: gap.topic, previousQuestion: gap.question })),
+  };
+  await beginViva();
+}
+
+function averageOutOf100(scores) {
+  if (scores.length === 0) {
+    return 0;
+  }
+  let total = 0;
+  for (const score of scores) {
+    total += score;
+  }
+  return Math.round((total / scores.length) * 10);
+}
+
+function renderComparison() {
+  const box = $('compare');
+  if (!state.retest) {
+    box.hidden = true;
+    return;
+  }
+  box.hidden = false;
+  const after = examinedRegions(state.history);
+  const list = $('compare-list');
+  list.replaceChildren();
+  let improved = 0;
+  const beforeScores = [];
+  const afterScores = [];
+  state.retest.regions.forEach((before, index) => {
+    const now = after[index];
+    beforeScores.push(before.score || 0);
+    if (!now) {
+      return; // re-test ended early
+    }
+    afterScores.push(now.score || 0);
+    if (VERDICT_RANK[now.verdict] > VERDICT_RANK[before.verdict]) {
+      improved++;
+    }
+    const item = el('li');
+    item.appendChild(el('span', `stamp ${before.verdict}`, t(`legend${capitalise(before.verdict)}`)));
+    item.appendChild(el('span', 'arrow', '→'));
+    item.appendChild(el('span', `stamp ${now.verdict}`, t(`legend${capitalise(now.verdict)}`)));
+    const link = richText('button', null, before.topic);
+    link.type = 'button';
+    link.appendChild(el('span', 'ref', `${now.file.split('/').pop()}:${now.startLine}–${now.endLine}`));
+    link.addEventListener('click', () => showLinesOf('report', now));
+    item.appendChild(link);
+    list.appendChild(item);
+  });
+  const answered = afterScores.length;
+  $('compare-summary').textContent = `${t('compareRetested')} ${answered} · ${t('compareImproved')} ${improved} · ${t('compareOnTheseLines')} ${averageOutOf100(beforeScores.slice(0, answered))} → ${averageOutOf100(afterScores)}/100`;
+}
+
+const VERDICT_RANK = { gap: 0, partial: 1, solid: 2 };
+
+function capitalise(word) {
+  return word ? word[0].toUpperCase() + word.slice(1) : '';
+}
+
+async function beginViva() {
   applyLanguage();
   state.history = [];
   state.current = null;
@@ -809,6 +916,20 @@ function renderReport() {
   } else if (report.score >= 55) {
     headline = t('headlineMid');
   }
+  // A re-test only covers the earlier gaps: say so instead of judging the whole project.
+  let eyebrow = t('reportEyebrow');
+  if (state.retest) {
+    const after = examinedRegions(state.history);
+    let fixed = 0;
+    for (const region of after) {
+      if (region.verdict === 'solid') {
+        fixed++;
+      }
+    }
+    eyebrow = t('retestEyebrow');
+    headline = `${t('retestFixed')} ${fixed} ${t('retestOfYour')} ${state.retest.regions.length} ${t('retestGaps')}`;
+  }
+  document.querySelector('[data-i18n="reportEyebrow"]').textContent = eyebrow;
   $('report-headline').textContent = headline;
   $('report-summary').replaceChildren(document.createTextNode(report.summary || ''));
 
@@ -845,6 +966,10 @@ function renderReport() {
   }
 
   renderReportTranscript();
+  renderComparison();
+  const gapsLeft = gapRegions().length;
+  $('retest-btn').hidden = gapsLeft === 0;
+  $('retest-btn').textContent = `${t('retestButton')} (${gapsLeft})`;
 
   // Open the heatmap on the first gap, or on the first examined region.
   const focus = (report.gaps || [])[0] || state.history[0];
@@ -893,6 +1018,17 @@ function reportMarkdown() {
   lines.push('');
   lines.push(`**Ownership score: ${report.score}/100**`);
   lines.push('');
+  if (state.retest) {
+    lines.push(`## ${t('retestLabel')}: before → after`);
+    const after = examinedRegions(state.history);
+    state.retest.regions.forEach((before, index) => {
+      const now = after[index];
+      if (now) {
+        lines.push(`- ${before.topic} (\`${now.file}:${now.startLine}-${now.endLine}\`): ${before.verdict} → ${now.verdict}`);
+      }
+    });
+    lines.push('');
+  }
   lines.push(report.summary || '');
   lines.push('');
   lines.push(`## ${t('owns')}`);
@@ -1020,6 +1156,7 @@ function saveSession() {
       history: state.history,
       current: state.current,
       report: state.report,
+      retest: state.retest,
       draft: $('answer-box').value,
     }));
   } catch (error) {
@@ -1108,6 +1245,7 @@ async function resumeSession() {
   state.history = saved.history;
   state.current = saved.current || null;
   state.report = saved.report || null;
+  state.retest = saved.retest || null;
   state.activeFile = { viva: state.files[0].name, report: state.files[0].name };
   setSettingsControls(state.settings);
   renderFileList();
@@ -1218,10 +1356,12 @@ function wireViva() {
 
 function wireReport() {
   $('copy-btn').addEventListener('click', copyReport);
+  $('retest-btn').addEventListener('click', startRetest);
   $('restart-btn').addEventListener('click', () => {
     state.history = [];
     state.current = null;
     state.report = null;
+    state.retest = null;
     clearSavedSession();
     showScreen('setup');
   });

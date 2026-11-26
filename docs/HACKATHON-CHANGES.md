@@ -119,3 +119,17 @@ Now (`src/github.js`, two routes in `server.js`, setup screen in `public/`):
 Checked against the real repository `Nafis8709/codeviva`: 29 files listed, 38 skipped,
 12 preselected (56,303 characters), loaded, and a viva started on them.
 Tests: `test/github.test.js` (8 tests, fake GitHub).
+
+### 6. Re-test my gaps — before → after
+
+Before: the report was the end; to practise again you started a fresh viva on random lines.
+
+Now: the report has **Re-test my gaps (N)**. It starts a short viva on only the regions
+marked *gap* or *partial* (up to 5). For each one the examiner is told what was asked
+last time and asks a **new question about the same lines from a different angle**; the
+line checker keeps re-test questions on their region and keeps the earlier topic. The
+re-test report says how many gaps the student can now defend and shows, per region,
+**before → after** (e.g. GAP → SOLID) with the score on those lines (e.g. 25 → 100).
+Works after a refresh mid-re-test, in demo mode (scripted re-test question), and in the
+Markdown export. Tests: re-test prompt and region-keeping (`test/checklist.test.js`),
+re-test settings over HTTP (`test/api.test.js`).

@@ -83,3 +83,11 @@ test('bad input gives readable 400 errors', async () => {
   const emptyAnswer = await post('/api/viva/grade', { files, settings, history: [], question: body.question, answer: '   ' });
   assert.equal(emptyAnswer.status, 400);
 });
+
+test('re-test settings: the number of questions follows the targets', async () => {
+  const targets = [{ file: 'token_queue.c', startLine: 53, endLine: 56, topic: 'Reset', previousQuestion: 'Why?' }];
+  const asked = await post('/api/viva/question', { files, settings: { totalQuestions: 5, targets }, history: [] });
+  assert.equal(asked.status, 200);
+  assert.equal(asked.body.question.file, 'token_queue.c');
+  assert.equal(asked.body.question.startLine, 53);
+});

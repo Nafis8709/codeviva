@@ -97,3 +97,26 @@ test("I don't know marks every key point missing", async () => {
   assert.equal(result.score, 0);
   assert.deepEqual(result.points.map((p) => p.status), ['missing', 'missing', 'missing']);
 });
+
+test('a re-test asks about each target region in turn and keeps questions on it', async () => {
+  const targets = [
+    { file: 'q.c', startLine: 3, endLine: 4, topic: 'Reset', previousQuestion: 'Why `step_3`?' },
+    { file: 'q.c', startLine: 15, endLine: 16, topic: 'Cleanup', previousQuestion: 'What does `step_15` free?' },
+  ];
+  // The model drifts to unrelated lines for the second target.
+  const llm = fakeLlm([
+    { file: 'q.c', startLine: 3, endLine: 4, topic: 'Reset', question: 'What if `step_4` ran first?', keyPoints: ['a', 'b'] },
+    { file: 'q.c', startLine: 8, endLine: 9, topic: 'Cleanup', question: 'Why is this here?', keyPoints: ['a', 'b'] },
+  ]);
+  const examiner = createAiExaminer(llm);
+  const retest = { ...settings, totalQuestions: 2, targets };
+  const first = await examiner.askQuestion({ files, settings: retest, history: [] });
+  assert.match(llm.calls[0].user, /RE-TEST/);
+  assert.match(llm.calls[0].user, /Last time they were asked: "Why `step_3`\?"/);
+  assert.deepEqual([first.startLine, first.endLine], [3, 4]);
+
+  const second = await examiner.askQuestion({ files, settings: retest, history: [{ ...first, verdict: 'solid', score: 9 }] });
+  assert.match(llm.calls[1].user, /exactly q\.c lines 15-16/);
+  assert.deepEqual([second.file, second.startLine, second.endLine], ['q.c', 15, 16]);
+  assert.equal(second.grounding.status, 'repaired');
+});

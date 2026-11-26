@@ -63,9 +63,28 @@ function historySummary(history) {
   return parts.join('\n');
 }
 
+// In a re-test, question N is about target region N.
+function targetFor(settings, history) {
+  const targets = (settings && settings.targets) || [];
+  const index = (history || []).filter((turn) => !turn.isFollowUp).length;
+  return targets[index] || null;
+}
+
 function questionPrompt({ files, settings, history, rejection }) {
   const number = history.filter((turn) => !turn.isFollowUp).length + 1;
   const covered = history.filter((turn) => !turn.isFollowUp).map(rangeLabel);
+  const target = targetFor(settings, history);
+  const regionTask = target
+    ? [
+      `This is a RE-TEST of code the student could not defend before. Ask about exactly ${rangeLabel(target)} (topic: ${target.topic}).`,
+      target.previousQuestion ? `Last time they were asked: "${target.previousQuestion}". Ask a NEW question about the same lines that checks the same understanding from a different angle — not a reworded copy.` : 'Ask a question that checks whether they now understand these lines.',
+      'Use startLine and endLine inside that region.',
+    ].join('\n')
+    : [
+      'Choose ONE specific region of 1 to 12 lines that a real examiner would probe and that has not been examined yet.',
+      'Good targets, roughly in this order: core logic the project depends on; edge cases (empty input, boundaries, off-by-one, NULL/None, overflow); memory or resource handling; why this design or data structure was chosen; time complexity.',
+      'Spread questions across different files and topics. Skip boilerplate (includes, imports, getters, print statements).',
+    ].join('\n');
   const user = [
     'CODE (every line starts with its line number):',
     numberCode(files),
@@ -75,9 +94,7 @@ function questionPrompt({ files, settings, history, rejection }) {
     covered.length > 0 ? `Already examined — do NOT ask about these lines again: ${covered.join('; ')}.` : '',
     '',
     `TASK: Ask question ${number} of ${settings.totalQuestions}.`,
-    'Choose ONE specific region of 1 to 12 lines that a real examiner would probe and that has not been examined yet.',
-    'Good targets, roughly in this order: core logic the project depends on; edge cases (empty input, boundaries, off-by-one, NULL/None, overflow); memory or resource handling; why this design or data structure was chosen; time complexity.',
-    'Spread questions across different files and topics. Skip boilerplate (includes, imports, getters, print statements).',
+    regionTask,
     'Ask ONE clear question (at most 2 sentences) that can only be answered by understanding those exact lines — never a textbook definition. Refer to the code naturally, e.g. "On line 42, why…".',
     'startLine and endLine MUST be the lines your question is about, and every identifier you put in `backticks` must appear in those lines.',
     rejection ? `Your previous question was rejected by the line checker because ${rejection}. Pick lines and a question that agree with each other.` : '',
@@ -205,4 +222,4 @@ function reportPrompt({ files, settings, history }) {
   return { system: systemPrompt(settings), user };
 }
 
-module.exports = { LANGUAGE_NAMES, systemPrompt, questionPrompt, keyPointsPrompt, gradePrompt, reportPrompt, historySummary };
+module.exports = { LANGUAGE_NAMES, systemPrompt, targetFor, questionPrompt, keyPointsPrompt, gradePrompt, reportPrompt, historySummary };

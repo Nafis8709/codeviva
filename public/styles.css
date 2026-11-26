@@ -178,6 +178,15 @@ h2 {
 .budget.is-over span { color: var(--red); }
 .repo-actions { display: flex; gap: 8px; }
 
+#compare[hidden] { display: none; }
+.compare-summary { margin: 0 0 8px; }
+.plain-list.compare-list li { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding-left: 0; }
+.plain-list.compare-list li::before { content: none; }
+.compare-list button { border: none; background: none; padding: 0; font: inherit; color: inherit; cursor: pointer; text-align: left; flex: 1; min-width: 10em; }
+.compare-list button:hover { text-decoration: underline; }
+.compare-list .ref { color: var(--ink-muted); font-family: var(--font-code); font-size: 0.8rem; margin-left: 6px; }
+.compare-list .arrow { color: var(--ink-muted); }
+
 .resume-card {
   display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
   border-left: 3px solid var(--ink);

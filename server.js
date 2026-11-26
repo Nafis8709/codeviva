@@ -12,13 +12,34 @@ const { chooseExaminer } = require('./src/config');
 const { LANGUAGE_NAMES } = require('./src/prompts');
 const { createGitHubClient } = require('./src/github');
 
+const MAX_TARGETS = 5;
+
+// A re-test targets the regions the student could not defend last time.
+function readTargets(raw) {
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+  return raw.slice(0, MAX_TARGETS).map((target) => ({
+    file: String(target.file || ''),
+    startLine: Number(target.startLine) || 1,
+    endLine: Number(target.endLine) || Number(target.startLine) || 1,
+    topic: String(target.topic || '').slice(0, 200),
+    previousQuestion: String(target.previousQuestion || '').slice(0, 600),
+  })).filter((target) => target.file !== '');
+}
+
 function readSettings(raw) {
   const settings = raw || {};
-  const totalQuestions = Number(settings.totalQuestions) === 3 ? 3 : 5;
+  const targets = readTargets(settings.targets);
+  let totalQuestions = Number(settings.totalQuestions) === 3 ? 3 : 5;
+  if (targets.length > 0) {
+    totalQuestions = targets.length;
+  }
   return {
     language: Object.prototype.hasOwnProperty.call(LANGUAGE_NAMES, settings.language) ? settings.language : 'en',
     style: settings.style === 'strict' ? 'strict' : 'friendly',
     totalQuestions,
+    targets,
   };
 }
 
