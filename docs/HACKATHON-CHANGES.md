@@ -27,3 +27,26 @@ scripted demo mode, not the AI.
 Each entry links the change to the commit(s) that made it.
 
 <!-- entries are added as each modification is completed -->
+
+### 1. Grounded questions — a line checker for every AI question
+
+Before: the model's file name and line numbers were only clamped into range, and an
+unknown file name silently fell back to the first file, so a question could highlight
+code it was not about.
+
+Now (`src/grounding.js`, used by `src/examiners/aiExaminer.js`):
+
+- every question is checked against the real code: the file exists, the lines exist,
+  the identifiers the question names in `backticks` appear in the highlighted lines,
+  any "line N" in the text is inside the highlight, and the region was not already examined;
+- if the identifiers are elsewhere, the highlight is moved there, anchoring on the most
+  specific identifier (e.g. a function name rather than a common field) and preferring
+  the file the model named;
+- if it cannot be repaired, the model is asked once more and told exactly what was wrong;
+- if that also fails, the viva continues and the question is marked *lines not verified*;
+- follow-ups are checked too, inside their parent question's file;
+- the page shows **✓ lines checked** next to each question (hover for what was fixed).
+
+Every question records `grounding: {status, attempts, problems}` so the evaluation can
+count how often questions were grounded first time, repaired, re-asked or unverified.
+Tests: `test/grounding.test.js` (12 tests).

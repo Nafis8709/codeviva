@@ -63,7 +63,7 @@ function historySummary(history) {
   return parts.join('\n');
 }
 
-function questionPrompt({ files, settings, history }) {
+function questionPrompt({ files, settings, history, rejection }) {
   const number = history.filter((turn) => !turn.isFollowUp).length + 1;
   const covered = history.filter((turn) => !turn.isFollowUp).map(rangeLabel);
   const user = [
@@ -79,6 +79,8 @@ function questionPrompt({ files, settings, history }) {
     'Good targets, roughly in this order: core logic the project depends on; edge cases (empty input, boundaries, off-by-one, NULL/None, overflow); memory or resource handling; why this design or data structure was chosen; time complexity.',
     'Spread questions across different files and topics. Skip boilerplate (includes, imports, getters, print statements).',
     'Ask ONE clear question (at most 2 sentences) that can only be answered by understanding those exact lines — never a textbook definition. Refer to the code naturally, e.g. "On line 42, why…".',
+    'startLine and endLine MUST be the lines your question is about, and every identifier you put in `backticks` must appear in those lines.',
+    rejection ? `Your previous question was rejected by the line checker because ${rejection}. Pick lines and a question that agree with each other.` : '',
     '',
     'Return JSON: {"file": "<exact file name from a FILE header>", "startLine": <integer>, "endLine": <integer>, "topic": "<2-5 word label>", "question": "<your question>"}',
   ].join('\n');

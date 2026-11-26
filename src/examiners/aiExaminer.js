@@ -7,8 +7,10 @@ const { clampRange } = require('../code');
 const { normaliseScore, verdictForScore } = require('../scoring');
 const { questionPrompt, gradePrompt, reportPrompt } = require('../prompts');
 const { LlmError } = require('../llm/extractJson');
+const { checkQuestion } = require('../grounding');
 
 const FALLBACK_SCORE = { solid: 9, partial: 5, gap: 1 };
+const MAX_QUESTION_ATTEMPTS = 2;
 
 function cleanText(value, maxLength) {
   return String(value || '').replace(/\s+\n/g, '\n').trim().slice(0, maxLength);
@@ -27,20 +29,55 @@ function bestTurnPerQuestion(history) {
 }
 
 function createAiExaminer(llm) {
+  // Asks the model for a question and checks it against the real code.
+  // A question that cannot be repaired is asked again once, with the reason.
   async function askQuestion({ files, settings, history }) {
     const number = history.filter((turn) => !turn.isFollowUp).length + 1;
-    const reply = await llm.generateJson(questionPrompt({ files, settings, history }));
-    const text = cleanText(reply.question, 600);
-    if (text === '') {
+    const allProblems = [];
+    let rejection = null;
+    let lastReply = null;
+    let lastText = '';
+
+    for (let attempt = 1; attempt <= MAX_QUESTION_ATTEMPTS; attempt++) {
+      const reply = await llm.generateJson(questionPrompt({ files, settings, history, rejection }));
+      const text = cleanText(reply.question, 600);
+      if (text === '') {
+        allProblems.push('no question text came back');
+        rejection = 'it contained no question';
+        continue;
+      }
+      lastReply = reply;
+      lastText = text;
+
+      const check = checkQuestion(files, { ...reply, question: text }, history);
+      allProblems.push(...check.problems);
+      if (check.status !== 'rejected') {
+        let status = check.status;
+        if (attempt > 1) {
+          status = 'regenerated';
+        }
+        return buildQuestion(number, reply, text, check.range, { status, attempts: attempt, problems: allProblems });
+      }
+      rejection = check.problems.join('; ');
+    }
+
+    if (!lastReply) {
       throw new LlmError('The examiner lost its place (no question came back). Please retry.');
     }
-    const range = clampRange(files, reply.file, reply.startLine, reply.endLine);
+    // Both attempts failed the check: keep the last question on valid lines,
+    // and say so, rather than stopping the viva.
+    const range = clampRange(files, lastReply.file, lastReply.startLine, lastReply.endLine);
+    return buildQuestion(number, lastReply, lastText, range, { status: 'unverified', attempts: MAX_QUESTION_ATTEMPTS, problems: allProblems });
+  }
+
+  function buildQuestion(number, reply, text, range, grounding) {
     return {
       id: `q${number}`,
       text,
       topic: cleanText(reply.topic, 60) || `Question ${number}`,
       ...range,
       isFollowUp: false,
+      grounding,
     };
   }
 
@@ -62,14 +99,28 @@ function createAiExaminer(llm) {
     const proposed = reply.followUp;
     if (followUpAllowed && verdict === 'partial' && proposed && cleanText(proposed.question, 600) !== '') {
       // Follow-ups stay in the same file as the question they push back on.
-      const range = clampRange(files, question.file, proposed.startLine || question.startLine, proposed.endLine || question.endLine);
+      const followUpText = cleanText(proposed.question, 600);
+      const check = checkQuestion(files, {
+        file: question.file,
+        startLine: proposed.startLine || question.startLine,
+        endLine: proposed.endLine || question.endLine,
+        question: followUpText,
+      }, history, { lockedFile: question.file, allowRepeat: true });
+      let range = check.range;
+      let status = check.status;
+      if (status === 'rejected' || !range) {
+        // Not worth another model call: fall back to the parent question's lines.
+        range = clampRange(files, question.file, question.startLine, question.endLine);
+        status = 'unverified';
+      }
       followUp = {
         id: `${question.id}-f`,
-        text: cleanText(proposed.question, 600),
+        text: followUpText,
         topic: question.topic,
         ...range,
         isFollowUp: true,
         parentId: question.id,
+        grounding: { status, attempts: 1, problems: check.problems },
       };
     }
 

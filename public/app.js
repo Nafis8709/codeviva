@@ -37,6 +37,10 @@ const STRINGS = {
     dontKnowAnswer: "(I don't know — teach me)", showAnswer: 'Show a model answer', nothingSolid: 'Nothing fully solid yet — that is what practice is for.',
     nothingGaps: 'No gaps found. Well defended.', examiner: 'Examiner', yourAnswer: 'Your answer', feedbackLabel: 'Feedback',
     headlineHigh: 'You own this code.', headlineMid: 'You own most of this code.', headlineLow: 'Some of this code still owns you.',
+    linesChecked: '✓ lines checked', linesUnchecked: 'lines not verified',
+    linesCheckedTitle: 'CodeViva checked that this question is about the highlighted lines.',
+    linesUncheckedTitle: 'The line checker could not confirm these lines; use the line link to look around.',
+    linesFixed: 'Fixed before asking:',
     jump: 'show lines', quitConfirm: 'End the viva now and see the report for the questions answered so far?',
   },
 };
@@ -400,6 +404,22 @@ function renderProgress() {
   }
 }
 
+// Shows whether the server's line checker confirmed that the question is about
+// the highlighted lines (only the AI examiner reports this).
+function groundingMark(grounding) {
+  if (!grounding || !grounding.status) {
+    return null;
+  }
+  const verified = grounding.status !== 'unverified';
+  const mark = el('span', `grounding ${verified ? 'is-verified' : 'is-unverified'}`, verified ? t('linesChecked') : t('linesUnchecked'));
+  let title = verified ? t('linesCheckedTitle') : t('linesUncheckedTitle');
+  if (grounding.problems && grounding.problems.length > 0) {
+    title += ` ${t('linesFixed')} ${grounding.problems.join('; ')}.`;
+  }
+  mark.title = title;
+  return mark;
+}
+
 function renderQuestionTurn(question) {
   const item = el('li', 'turn-question');
   const meta = el('div', 'turn-meta', question.isFollowUp ? `${t('examiner')} · ${t('followUp')}` : `${t('examiner')} · ${t('question')} ${questionNumber(question)}`);
@@ -408,6 +428,10 @@ function renderQuestionTurn(question) {
   jump.title = t('jump');
   jump.addEventListener('click', () => showLinesOf('viva', question));
   meta.appendChild(jump);
+  const mark = groundingMark(question.grounding);
+  if (mark) {
+    meta.appendChild(mark);
+  }
   item.appendChild(meta);
   item.appendChild(richText('p', 'examiner-text', question.text));
   $('transcript').appendChild(item);
