@@ -11,3 +11,6 @@ node_modules/
 npm-debug.log*
 .DS_Store
 Thumbs.db
+
+# Dry runs of the evaluation with the fake model
+eval/results/fake/

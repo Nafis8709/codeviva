@@ -1,0 +1,105 @@
+{
+  "about": "Evaluation set for CodeViva's grading. Each case is one viva question on real student code; each answer gets a human label (solid / partial / gap) in eval/labels.json. Code sources: the bundled C sample, and two of the author's own course projects (SMS Flask backend @07b5cdf, ReliefSync JavaFX @f01a567). Answers were written to cover a realistic range: complete, shallow, vague, confidently wrong, off-target, and answers in Bangla or Banglish.",
+  "cases": [
+    {
+      "id": "queue-dequeue",
+      "language": "C",
+      "files": ["sample/token_queue.h", "sample/token_queue.c"],
+      "question": {
+        "file": "token_queue.c",
+        "startLine": 53,
+        "endLine": 56,
+        "topic": "Empty queue reset",
+        "text": "On lines 53-56, why does `dequeue` set `tail` to NULL when `head` becomes NULL, and what would break if that line were missing?"
+      },
+      "answers": [
+        { "id": "queue-1", "text": "When the last node is removed, head becomes NULL but tail still points at the node we are about to free. If we don't reset it, the next enqueue sees tail is not NULL and does q->tail->next = node, which writes into freed memory (use-after-free), and head stays NULL so the new customer is lost from the queue." },
+        { "id": "queue-2", "text": "Because the queue is empty now, so tail should also be empty." },
+        { "id": "queue-3", "text": "tail NULL na korle tail ekhono oi free kora node ke point korbe. Porer enqueue e q->tail->next = node hobe, mane freed memory te likhbe, dangling pointer, crash ba undefined behaviour hote pare." },
+        { "id": "queue-4", "text": "It resets tail so that the size counter stays correct." },
+        { "id": "queue-5", "text": "This frees the tail node so that there is no memory leak when the queue becomes empty." },
+        { "id": "queue-6", "text": "Setting tail to NULL makes sure the queue is empty." }
+      ]
+    },
+    {
+      "id": "sms-enroll-race",
+      "language": "Python",
+      "files": ["sms/course_service.py", "sms/course.py"],
+      "question": {
+        "file": "course_service.py",
+        "startLine": 69,
+        "endLine": 73,
+        "topic": "Last seat race",
+        "text": "Between line 69 and line 73, `enroll` reads the seat count and then adds the enrollment. What can go wrong if two students try to take the last seat at the same moment, and how would you prevent it?"
+      },
+      "answers": [
+        { "id": "sms-1", "text": "It is check-then-act. Both requests can read enrolled_count = seats - 1 before either one inserts, both pass check_can_enroll, and both call add, so the course ends up over capacity. To prevent it, the count and the insert must happen atomically: one transaction with a write lock (BEGIN IMMEDIATE in SQLite), or let the database enforce it with an INSERT that only succeeds while the count is below seats." },
+        { "id": "sms-2", "text": "Both might get enrolled and then the course has more students than seats. You could use a lock." },
+        { "id": "sms-3", "text": "Nothing goes wrong, because check_can_enroll raises Conflict when there are no seats left." },
+        { "id": "sms-4", "text": "দুইটা request একসাথে count পড়ে, দুইজনেই দেখে একটা সিট খালি, তারপর দুইজনেই add করে — ফলে সিটের চেয়ে বেশি student হয়ে যায়। এটা race condition। count পড়া আর insert করা একটা transaction-এর ভিতরে lock দিয়ে করতে হবে।" },
+        { "id": "sms-5", "text": "The same student could end up enrolled twice in the course." },
+        { "id": "sms-6", "text": "Use try except to catch the error so the server does not crash." }
+      ]
+    },
+    {
+      "id": "sms-check-order",
+      "language": "Python",
+      "files": ["sms/course.py"],
+      "question": {
+        "file": "course.py",
+        "startLine": 17,
+        "endLine": 22,
+        "topic": "Rule order",
+        "text": "In `check_can_enroll`, why is `already_enrolled` checked before the seat count, and what would a student see if the two checks were swapped and the course were full?"
+      },
+      "answers": [
+        { "id": "order-1", "text": "So that a student who is already in a full course gets the accurate reason, 'already enrolled', instead of 'No seats left'. If the checks were swapped, that student would be told there are no seats, which is misleading since they already have one. Both raise Conflict, so only the message changes, not the status code." },
+        { "id": "order-2", "text": "Because it is more important to check that first." },
+        { "id": "order-3", "text": "If they were swapped, a student who is already enrolled in a full course would get 'No seats left in this course'." },
+        { "id": "order-4", "text": "If the order were swapped, the student would be enrolled twice." },
+        { "id": "order-5", "text": "Checking already_enrolled first avoids a database query for the seat count, so it is faster." },
+        { "id": "order-6", "text": "Already enrolled check age korle full course e thaka student thik message pay, 'already enrolled'. Ulta korle take 'No seats left' dekhabe, jeta bhul karon, karon tar to already seat ache." }
+      ]
+    },
+    {
+      "id": "relief-handle-skip",
+      "language": "Java",
+      "files": ["reliefsync/VerificationHandler.java"],
+      "question": {
+        "file": "VerificationHandler.java",
+        "startLine": 34,
+        "endLine": 39,
+        "topic": "Skipping approved levels",
+        "text": "In `handle`, what happens on lines 35-38 when this handler's `level` is already in `approvedLevels`, and what does the chain return if every level has already been approved?"
+      },
+      "answers": [
+        { "id": "relief-1", "text": "If this level was already approved, it does not ask this verifier again; it passes the same context on to the next handler. If there is no next handler, every level is approved, so it returns VERIFIED with the complete flag true. That lets the whole chain be run again after each approval and skip the levels that are already done." },
+        { "id": "relief-2", "text": "It skips to the next handler." },
+        { "id": "relief-3", "text": "It throws an AuthorizationException because the session role does not match this handler's role." },
+        { "id": "relief-4", "text": "Approved hole next handler e pathay. Ar next na thakle, mane sob level approved, tokhon VERIFIED return kore." },
+        { "id": "relief-5", "text": "It returns VERIFIED immediately." },
+        { "id": "relief-6", "text": "This is the chain of responsibility pattern, where each handler has a reference to the next one." }
+      ]
+    },
+    {
+      "id": "relief-chain-normal",
+      "language": "Java",
+      "files": ["reliefsync/VerificationChainBuilder.java", "reliefsync/VerificationHandler.java"],
+      "question": {
+        "file": "VerificationChainBuilder.java",
+        "startLine": 6,
+        "endLine": 15,
+        "topic": "Chain for NORMAL tier",
+        "text": "For a NORMAL-tier request, which handlers does `build` link together, and after the area coordinator approves, what outcome does the chain report?"
+      },
+      "answers": [
+        { "id": "chain-1", "text": "Only the volunteer and the area coordinator, because the if on line 10 is false for NORMAL, so area has no next. When the area coordinator approves, handle finds next == null, nextLevel is null, and the result is VERIFIED: the request is fully verified after two steps." },
+        { "id": "chain-2", "text": "Volunteer and area coordinator." },
+        { "id": "chain-3", "text": "All four handlers: volunteer, area coordinator, relief coordinator and administrator." },
+        { "id": "chain-4", "text": "NORMAL hole shudhu volunteer ar area coordinator link hoy. Area approve korar por ar kono next nai, tai outcome VERIFIED." },
+        { "id": "chain-5", "text": "Volunteer, area coordinator and relief coordinator; after the area coordinator approves it moves to the relief coordinator as STEP_APPROVED." },
+        { "id": "chain-6", "text": "It builds a chain of responsibility for verification." }
+      ]
+    }
+  ]
+}
