@@ -37,6 +37,8 @@ const STRINGS = {
     dontKnowAnswer: "(I don't know — teach me)", showAnswer: 'Show a model answer', nothingSolid: 'Nothing fully solid yet — that is what practice is for.',
     nothingGaps: 'No gaps found. Well defended.', examiner: 'Examiner', yourAnswer: 'Your answer', feedbackLabel: 'Feedback',
     headlineHigh: 'You own this code.', headlineMid: 'You own most of this code.', headlineLow: 'Some of this code still owns you.',
+    resumeVivaTitle: 'You have an unfinished viva', resumeVivaButton: 'Resume',
+    resumeReportTitle: 'Your last viva report', resumeReportButton: 'Open report', answeredWord: 'questions answered',
     answerKey: 'Answer key — what the examiner was listening for', wrongClaim: 'Not right:',
     point_covered: 'covered', point_partial: 'partly covered', point_missing: 'missing',
     linesChecked: '✓ lines checked', linesUnchecked: 'lines not verified',
@@ -99,6 +101,7 @@ function splitLines(content) {
 }
 
 function showScreen(name) {
+  state.screen = name;
   for (const screen of ['setup', 'viva', 'report']) {
     $(`screen-${screen}`).hidden = screen !== name;
   }
@@ -530,6 +533,7 @@ function askQuestion(question) {
   setBusy(false);
   $('answer-box').value = '';
   $('answer-box').focus({ preventScroll: true });
+  saveSession();
 }
 
 async function fetchNextQuestion() {
@@ -554,9 +558,11 @@ async function startViva() {
   state.activeFile = { viva: state.files[0].name, report: state.files[0].name };
   $('transcript').replaceChildren();
   hideError();
+  $('resume-card').hidden = true;
   showScreen('viva');
   renderCode('viva');
   renderProgress();
+  saveSession();
   await fetchNextQuestion();
 }
 
@@ -589,6 +595,8 @@ async function submitAnswer(dontKnow) {
     };
     state.history.push(turn);
     state.current = null;
+    $('answer-box').value = '';
+    saveSession();
     renderAnswerTurn(turn);
     renderCode('viva');
     renderProgress();
@@ -627,6 +635,7 @@ async function finishViva() {
     setBusy(false);
     renderReport();
     showScreen('report');
+    saveSession();
   } catch (error) {
     setBusy(false);
     showError(error.message, finishViva);
@@ -836,6 +845,144 @@ function toggleListening() {
 }
 
 // ---------------------------------------------------------------------------
+// Saving the session in this browser, so a refresh, a closed tab or a crash
+// never loses answered questions. Nothing leaves the browser.
+// ---------------------------------------------------------------------------
+const SAVE_KEY = 'codeviva.session.v1';
+let draftTimer = null;
+
+function saveSession() {
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify({
+      version: 1,
+      savedAt: Date.now(),
+      screen: state.screen,
+      files: state.files,
+      settings: state.settings,
+      history: state.history,
+      current: state.current,
+      report: state.report,
+      draft: $('answer-box').value,
+    }));
+  } catch (error) {
+    // Storage full or blocked (private mode): the viva still works, it just won't survive a refresh.
+  }
+}
+
+function loadSavedSession() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(SAVE_KEY));
+    if (!saved || saved.version !== 1 || !Array.isArray(saved.files) || saved.files.length === 0 || !Array.isArray(saved.history)) {
+      return null;
+    }
+    if (saved.screen !== 'viva' && saved.screen !== 'report') {
+      return null;
+    }
+    return saved;
+  } catch (error) {
+    return null;
+  }
+}
+
+function clearSavedSession() {
+  try {
+    localStorage.removeItem(SAVE_KEY);
+  } catch (error) {
+    // nothing to clear
+  }
+}
+
+function timeAgo(timestamp) {
+  const minutes = Math.round((Date.now() - timestamp) / 60000);
+  if (minutes < 1) {
+    return 'just now';
+  }
+  if (minutes < 60) {
+    return `${minutes} min ago`;
+  }
+  const hours = Math.round(minutes / 60);
+  if (hours < 48) {
+    return `${hours} h ago`;
+  }
+  return `${Math.round(hours / 24)} days ago`;
+}
+
+function offerResume() {
+  const saved = loadSavedSession();
+  $('resume-card').hidden = !saved;
+  if (!saved) {
+    return;
+  }
+  const fileNames = saved.files.map((f) => f.name).slice(0, 3).join(', ') + (saved.files.length > 3 ? '…' : '');
+  if (saved.screen === 'report' && saved.report) {
+    $('resume-title').textContent = t('resumeReportTitle');
+    $('resume-detail').textContent = `${saved.report.score}/100 · ${fileNames} · ${timeAgo(saved.savedAt)}`;
+    $('resume-btn').textContent = t('resumeReportButton');
+  } else {
+    const answered = saved.history.filter((turn) => !turn.isFollowUp).length;
+    const total = (saved.settings && saved.settings.totalQuestions) || 5;
+    $('resume-title').textContent = t('resumeVivaTitle');
+    $('resume-detail').textContent = `${answered} ${t('of')} ${total} ${t('answeredWord')} · ${fileNames} · ${timeAgo(saved.savedAt)}`;
+    $('resume-btn').textContent = t('resumeVivaButton');
+  }
+}
+
+function setSettingsControls(settings) {
+  $('language').value = settings.language || 'en';
+  const style = document.querySelector(`input[name="style"][value="${settings.style === 'strict' ? 'strict' : 'friendly'}"]`);
+  if (style) {
+    style.checked = true;
+  }
+  const total = document.querySelector(`input[name="total"][value="${settings.totalQuestions === 3 ? 3 : 5}"]`);
+  if (total) {
+    total.checked = true;
+  }
+}
+
+async function resumeSession() {
+  const saved = loadSavedSession();
+  $('resume-card').hidden = true;
+  if (!saved) {
+    return;
+  }
+  state.files = saved.files;
+  state.settings = saved.settings || state.settings;
+  state.history = saved.history;
+  state.current = saved.current || null;
+  state.report = saved.report || null;
+  state.activeFile = { viva: state.files[0].name, report: state.files[0].name };
+  setSettingsControls(state.settings);
+  renderFileList();
+  applyLanguage();
+  hideError();
+
+  if (saved.screen === 'report' && state.report) {
+    renderReport();
+    showScreen('report');
+    return;
+  }
+
+  // Rebuild the transcript from the saved turns, without asking the AI again.
+  $('transcript').replaceChildren();
+  showScreen('viva');
+  renderCode('viva');
+  for (const turn of state.history) {
+    renderQuestionTurn(turn);
+    renderAnswerTurn(turn);
+  }
+  renderProgress();
+  if (state.current) {
+    askQuestion(state.current);
+    $('answer-box').value = saved.draft || '';
+    saveSession(); // askQuestion saved an empty box; keep the restored draft
+  } else if (mainCount() < state.settings.totalQuestions) {
+    await fetchNextQuestion();
+  } else {
+    await finishViva();
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Wiring
 // ---------------------------------------------------------------------------
 function wireSetup() {
@@ -886,6 +1033,7 @@ function wireViva() {
       return;
     }
     if (state.history.length === 0) {
+      clearSavedSession();
       showScreen('setup');
       return;
     }
@@ -907,12 +1055,28 @@ function wireReport() {
     state.history = [];
     state.current = null;
     state.report = null;
+    clearSavedSession();
     showScreen('setup');
+  });
+}
+
+function wireResume() {
+  $('resume-btn').addEventListener('click', resumeSession);
+  $('discard-btn').addEventListener('click', () => {
+    clearSavedSession();
+    $('resume-card').hidden = true;
+  });
+  // Keep the half-written answer too.
+  $('answer-box').addEventListener('input', () => {
+    clearTimeout(draftTimer);
+    draftTimer = setTimeout(saveSession, 400);
   });
 }
 
 wireSetup();
 wireViva();
 wireReport();
+wireResume();
 renderFileList();
+offerResume();
 loadStatus();

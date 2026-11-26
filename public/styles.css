@@ -153,6 +153,20 @@ h2 {
 .lede em { color: var(--ink); font-style: normal; border-bottom: 2px solid var(--red); }
 .muted { color: var(--ink-muted); font-weight: 400; }
 
+.resume-card {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  border-left: 3px solid var(--ink);
+  background: var(--paper);
+  padding: 12px 14px;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  margin: 0 0 24px;
+  font-size: 0.92rem;
+}
+.resume-card[hidden] { display: none; }
+.resume-card strong { display: block; }
+.resume-card span { color: var(--ink-muted); }
+.resume-actions { display: flex; gap: 8px; }
+
 .demo-notice {
   border-left: 3px solid var(--amber);
   background: var(--amber-wash);

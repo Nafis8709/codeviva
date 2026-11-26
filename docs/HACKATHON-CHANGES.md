@@ -74,3 +74,24 @@ Now (`src/prompts.js`, `src/examiners/aiExaminer.js`, `src/scoring.js`):
 Also fixed while testing: a follow-up about a common name (e.g. `tail`) now falls back
 to its parent question's lines instead of the first place that name appears.
 Tests: `test/checklist.test.js` (8 tests).
+
+### 3. Evaluation set and runner
+
+`eval/` — 5 viva questions on real student code (the C sample, the author's SMS Flask
+project and ReliefSync Java project) with 30 answers in English, Bangla and Banglish;
+`npm run label` records the human verdicts, `npm run eval` grades every answer with
+the answer-key and the old holistic grader several times, runs short vivas to count how
+questions were grounded, and writes `eval/results/SUMMARY.md`. See `eval/README.md`.
+Tests: `test/eval-metrics.test.js`.
+
+### 4. The viva survives a refresh
+
+Before: the session lived only in the page; a refresh, a closed tab or a browser crash
+lost every answered question.
+
+Now (`public/app.js`): after every question, answer and report the session is saved in
+the browser (`localStorage`, never sent anywhere), including a half-written answer.
+On the next visit a card offers **Resume** (or **Open report**) and rebuilds the
+transcript, highlights and settings without calling the AI again. *New viva* and
+*Discard* clear it. Checked in a headless browser: refresh mid-follow-up restores the
+same transcript, draft and highlighted lines; a finished report reopens with the same score.

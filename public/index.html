@@ -30,6 +30,17 @@
           and shows you what you can't explain yet, before a real examiner, reviewer or interviewer does.
         </p>
 
+        <div class="resume-card" id="resume-card" hidden>
+          <div>
+            <strong id="resume-title">You have an unfinished viva</strong>
+            <span id="resume-detail"></span>
+          </div>
+          <div class="resume-actions">
+            <button type="button" class="btn btn-primary btn-small" id="resume-btn">Resume</button>
+            <button type="button" class="btn btn-ghost btn-small" id="discard-btn">Discard</button>
+          </div>
+        </div>
+
         <div class="demo-notice" id="demo-notice" hidden>
           <strong>Demo mode.</strong> No API key is set, so a scripted examiner (no AI) runs instead. It is fully scripted for the
           sample project and speaks English only. Add a free Gemini key to <code>.env</code> to examine your own code properly.
