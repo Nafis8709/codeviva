@@ -54,6 +54,32 @@
             <span class="dropzone-sub">or <u>choose files</u> · .c .cpp .java .py .js .ts and more · up to 60,000 characters</span>
           </label>
 
+          <form class="repo-row" id="repo-form" autocomplete="off">
+            <label for="repo-url" class="sr-only">Public GitHub repository link</label>
+            <input type="text" id="repo-url" placeholder="…or paste a public GitHub repo, e.g. https://github.com/you/project" spellcheck="false">
+            <button type="submit" class="btn btn-small" id="repo-btn">Load repo</button>
+          </form>
+
+          <div class="repo-picker" id="repo-picker" hidden>
+            <div class="repo-head">
+              <strong id="repo-name"></strong>
+              <span class="muted" id="repo-meta"></span>
+            </div>
+            <p class="repo-hint">Tick the files your viva should cover. Source files are preselected; tests and config are listed but not ticked.</p>
+            <ul class="repo-files" id="repo-files"></ul>
+            <div class="repo-foot">
+              <div class="budget" aria-live="polite">
+                <div class="budget-bar"><i id="budget-fill"></i></div>
+                <span id="budget-text"></span>
+              </div>
+              <div class="repo-actions">
+                <button type="button" class="btn btn-ghost btn-small" id="repo-clear">Clear</button>
+                <button type="button" class="btn btn-ghost btn-small" id="repo-cancel">Cancel</button>
+                <button type="button" class="btn btn-primary btn-small" id="repo-add">Add files</button>
+              </div>
+            </div>
+          </div>
+
           <div class="load-row">
             <button type="button" class="btn btn-ghost" id="sample-btn">
               Try the sample project <span class="muted">(C · bank token queue)</span>

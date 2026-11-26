@@ -37,6 +37,11 @@ const STRINGS = {
     dontKnowAnswer: "(I don't know — teach me)", showAnswer: 'Show a model answer', nothingSolid: 'Nothing fully solid yet — that is what practice is for.',
     nothingGaps: 'No gaps found. Well defended.', examiner: 'Examiner', yourAnswer: 'Your answer', feedbackLabel: 'Feedback',
     headlineHigh: 'You own this code.', headlineMid: 'You own most of this code.', headlineLow: 'Some of this code still owns you.',
+    repoLoad: 'Load repo', repoLoading: 'Reading repo…', repoAdd: 'Add files', repoAdding: 'Fetching files…',
+    repoSkipped: 'skipped (dependencies, lockfiles, binaries, hidden folders)', repoTruncated: 'very large repo: only part of it is listed',
+    repoEmpty: 'No code files found here. Try a folder link (…/tree/main/src) or load files directly.',
+    repoAdded: 'Loaded', from: 'from', branch: 'branch', filesWord: 'files', characters: 'characters', max: 'max',
+    kind_test: 'test', kind_other: 'other',
     resumeVivaTitle: 'You have an unfinished viva', resumeVivaButton: 'Resume',
     resumeReportTitle: 'Your last viva report', resumeReportButton: 'Open report', answeredWord: 'questions answered',
     answerKey: 'Answer key — what the examiner was listening for', wrongClaim: 'Not right:',
@@ -236,6 +241,137 @@ function addPasted() {
   renderFileList();
 }
 
+// ---------------------------------------------------------------------------
+// Loading from a public GitHub repository
+// ---------------------------------------------------------------------------
+const repo = { listing: null, selected: new Set(), busy: false };
+
+function formatSize(bytes) {
+  return bytes < 1000 ? `${bytes} B` : `${(bytes / 1000).toFixed(1)} kB`;
+}
+
+function selectedSize() {
+  let total = 0;
+  for (const file of repo.listing.files) {
+    if (repo.selected.has(file.path)) {
+      total += file.size;
+    }
+  }
+  return total;
+}
+
+function setRepoBusy(busy, label) {
+  repo.busy = busy;
+  $('repo-btn').disabled = busy;
+  $('repo-add').disabled = busy;
+  $('repo-btn').textContent = busy && label === 'list' ? t('repoLoading') : t('repoLoad');
+  $('repo-add').textContent = busy && label === 'add' ? t('repoAdding') : `${t('repoAdd')} (${repo.selected.size})`;
+}
+
+function renderRepoBudget() {
+  const used = selectedSize();
+  const budget = repo.listing.budget;
+  const over = used > budget || repo.selected.size > repo.listing.maxFiles;
+  $('budget-fill').style.width = `${Math.min(100, (used / budget) * 100)}%`;
+  $('budget-text').textContent = `${used.toLocaleString('en-US')} / ${budget.toLocaleString('en-US')} ${t('characters')} · ${repo.selected.size} ${t('filesWord')}${repo.selected.size > repo.listing.maxFiles ? ` (${t('max')} ${repo.listing.maxFiles})` : ''}`;
+  document.querySelector('.budget').classList.toggle('is-over', over);
+  $('repo-add').disabled = repo.busy || over || repo.selected.size === 0;
+  $('repo-add').textContent = `${t('repoAdd')} (${repo.selected.size})`;
+}
+
+function renderRepoPicker() {
+  const listing = repo.listing;
+  $('repo-picker').hidden = false;
+  $('repo-name').textContent = `${listing.owner}/${listing.repo}${listing.folder ? `/${listing.folder}` : ''}`;
+  let meta = `${t('branch')} ${listing.branch} · ${listing.files.length} ${t('filesWord')}`;
+  if (listing.skipped > 0) {
+    meta += ` · ${listing.skipped} ${t('repoSkipped')}`;
+  }
+  if (listing.truncated) {
+    meta += ` · ${t('repoTruncated')}`;
+  }
+  $('repo-meta').textContent = meta;
+
+  const list = $('repo-files');
+  list.replaceChildren();
+  if (listing.files.length === 0) {
+    list.appendChild(el('li', 'empty', t('repoEmpty')));
+  }
+  for (const file of listing.files) {
+    const item = el('li');
+    const label = el('label');
+    const box = el('input');
+    box.type = 'checkbox';
+    box.checked = repo.selected.has(file.path);
+    box.addEventListener('change', () => {
+      if (box.checked) {
+        repo.selected.add(file.path);
+      } else {
+        repo.selected.delete(file.path);
+      }
+      renderRepoBudget();
+    });
+    label.appendChild(box);
+    label.appendChild(el('span', null, file.path));
+    label.appendChild(el('span', 'kind', file.kind === 'code' ? '' : t(`kind_${file.kind}`)));
+    label.appendChild(el('span', 'size', formatSize(file.size)));
+    item.appendChild(label);
+    list.appendChild(item);
+  }
+  renderRepoBudget();
+}
+
+async function listRepo(event) {
+  event.preventDefault();
+  const url = $('repo-url').value.trim();
+  if (url === '' || repo.busy) {
+    $('repo-url').focus();
+    return;
+  }
+  showLoadNotice('');
+  setRepoBusy(true, 'list');
+  try {
+    repo.listing = await postJson('/api/repo/list', { url });
+    repo.selected = new Set(repo.listing.files.filter((f) => f.suggested).map((f) => f.path));
+    renderRepoPicker();
+  } catch (error) {
+    $('repo-picker').hidden = true;
+    showLoadNotice(error.message);
+  } finally {
+    setRepoBusy(false);
+    if (repo.listing) {
+      renderRepoBudget();
+    }
+  }
+}
+
+async function addRepoFiles() {
+  if (!repo.listing || repo.selected.size === 0 || repo.busy) {
+    return;
+  }
+  showLoadNotice('');
+  setRepoBusy(true, 'add');
+  try {
+    const { owner, repo: name, branch } = repo.listing;
+    // Keep the repository's order, not the order the boxes were ticked.
+    const paths = repo.listing.files.filter((f) => repo.selected.has(f.path)).map((f) => f.path);
+    const data = await postJson('/api/repo/files', { owner, repo: name, branch, paths });
+    // Repository files replace what was loaded before, so the budget is clear.
+    state.files = [];
+    for (const file of data.files) {
+      addFile(file.name, file.content);
+    }
+    renderFileList();
+    $('repo-picker').hidden = true;
+    showLoadNotice(`${t('repoAdded')} ${data.files.length} ${t('filesWord')} ${t('from')} ${owner}/${name}.`);
+  } catch (error) {
+    showLoadNotice(error.message); // the picker stays open with the same selection
+  } finally {
+    setRepoBusy(false);
+    renderRepoBudget();
+  }
+}
+
 function renderFileList() {
   const list = $('file-list');
   list.replaceChildren();
@@ -290,11 +426,16 @@ function renderTabs(where) {
     return;
   }
   tabs.hidden = false;
+  let activeTab = null;
   for (const file of state.files) {
-    const tab = el('button', null, file.name);
+    const tab = el('button', null, tabLabel(file.name));
     tab.type = 'button';
+    tab.title = file.name;
     tab.setAttribute('role', 'tab');
     tab.classList.toggle('is-active', file.name === state.activeFile[where]);
+    if (file.name === state.activeFile[where]) {
+      activeTab = tab;
+    }
     if (where === 'viva' && state.current && state.current.file === file.name && file.name !== state.activeFile.viva) {
       tab.classList.add('has-question');
     }
@@ -304,6 +445,23 @@ function renderTabs(where) {
     });
     tabs.appendChild(tab);
   }
+  if (activeTab) {
+    // Bring the active tab into view inside the tab strip (not the page).
+    tabs.scrollLeft = Math.max(0, activeTab.offsetLeft - tabs.clientWidth / 3);
+  }
+}
+
+// Tabs show just the file name (the full path is in the tooltip), unless
+// two loaded files share a name.
+function tabLabel(path) {
+  const base = path.split('/').pop();
+  let sameName = 0;
+  for (const file of state.files) {
+    if (file.name.split('/').pop() === base) {
+      sameName++;
+    }
+  }
+  return sameName > 1 ? path : base;
 }
 
 function renderCode(where) {
@@ -1005,6 +1163,15 @@ function wireSetup() {
   });
 
   $('sample-btn').addEventListener('click', loadSample);
+  $('repo-form').addEventListener('submit', listRepo);
+  $('repo-add').addEventListener('click', addRepoFiles);
+  $('repo-clear').addEventListener('click', () => {
+    repo.selected.clear();
+    renderRepoPicker();
+  });
+  $('repo-cancel').addEventListener('click', () => {
+    $('repo-picker').hidden = true;
+  });
   $('paste-add').addEventListener('click', addPasted);
   $('start-btn').addEventListener('click', startViva);
 }

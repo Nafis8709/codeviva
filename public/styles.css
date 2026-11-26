@@ -153,6 +153,31 @@ h2 {
 .lede em { color: var(--ink); font-style: normal; border-bottom: 2px solid var(--red); }
 .muted { color: var(--ink-muted); font-weight: 400; }
 
+.repo-row { display: flex; gap: 8px; margin-top: 12px; }
+.repo-row input {
+  flex: 1; min-width: 0; padding: 8px 10px; font: inherit; font-size: 0.92rem;
+  border: 1px solid var(--rule-strong); border-radius: var(--radius); background: var(--paper-raised); color: var(--ink);
+}
+.repo-row input:focus { outline: 2px solid var(--ink); outline-offset: 1px; }
+.repo-picker { margin-top: 12px; border: 1px solid var(--rule-strong); border-radius: var(--radius); background: var(--paper-raised); padding: 12px; }
+.repo-picker[hidden] { display: none; }
+.repo-head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.repo-hint { margin: 4px 0 8px; font-size: 0.86rem; color: var(--ink-muted); }
+.repo-files { list-style: none; margin: 0; padding: 0; max-height: 260px; overflow-y: auto; border-top: 1px solid var(--rule); }
+.repo-files li { border-bottom: 1px solid var(--rule); }
+.repo-files label { display: grid; grid-template-columns: 20px 1fr auto auto; gap: 8px; align-items: center; padding: 5px 4px; cursor: pointer; font-family: var(--font-code); font-size: 0.82rem; }
+.repo-files label:hover { background: var(--paper); }
+.repo-files .kind { font-family: var(--font-ui); font-size: 0.72rem; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.repo-files .size { color: var(--ink-muted); min-width: 4.5em; text-align: right; }
+.repo-files .empty { padding: 10px 4px; color: var(--ink-muted); font-size: 0.9rem; }
+.repo-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+.budget { display: flex; align-items: center; gap: 8px; font-size: 0.84rem; color: var(--ink-muted); }
+.budget-bar { width: 140px; height: 6px; border-radius: 3px; background: var(--rule); overflow: hidden; }
+.budget-bar i { display: block; height: 100%; width: 0; background: var(--green); transition: width 0.15s; }
+.budget.is-over .budget-bar i { background: var(--red); }
+.budget.is-over span { color: var(--red); }
+.repo-actions { display: flex; gap: 8px; }
+
 .resume-card {
   display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
   border-left: 3px solid var(--ink);

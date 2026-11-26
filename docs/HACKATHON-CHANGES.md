@@ -95,3 +95,27 @@ On the next visit a card offers **Resume** (or **Open report**) and rebuilds the
 transcript, highlights and settings without calling the AI again. *New viva* and
 *Discard* clear it. Checked in a headless browser: refresh mid-follow-up restores the
 same transcript, draft and highlighted lines; a finished report reopens with the same score.
+
+### 5. Load a public GitHub repository by link
+
+Before: files had to be dragged in, picked or pasted one by one.
+
+Now (`src/github.js`, two routes in `server.js`, setup screen in `public/`):
+
+- paste `https://github.com/owner/repo` (or a branch/folder link, or `owner/repo`);
+- one GitHub API call lists the tree; dependencies, lockfiles, minified files,
+  binaries, files over 100 kB and hidden folders are skipped; source files are listed
+  first and **preselected within the 60,000-character budget** (source folders first,
+  tests and config listed but not ticked);
+- a meter shows characters and files used; *Add files* is disabled when over budget;
+- the chosen files are read from `raw.githubusercontent.com` — a fixed host, so the
+  server never fetches an address the user typed; owner, repo and paths are validated;
+- distinct, readable failures: not a GitHub link, repository not found or private,
+  GitHub rate limit, network failure, over budget — the picker and selection stay open;
+- optional `GITHUB_TOKEN` raises GitHub's limit;
+- with many files, tabs show file names (full path on hover) and the active tab
+  scrolls into view.
+
+Checked against the real repository `Nafis8709/codeviva`: 29 files listed, 38 skipped,
+12 preselected (56,303 characters), loaded, and a viva started on them.
+Tests: `test/github.test.js` (8 tests, fake GitHub).

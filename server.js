@@ -10,6 +10,7 @@ const { validateFiles, InputError } = require('./src/code');
 const { computeScore } = require('./src/scoring');
 const { chooseExaminer } = require('./src/config');
 const { LANGUAGE_NAMES } = require('./src/prompts');
+const { createGitHubClient } = require('./src/github');
 
 function readSettings(raw) {
   const settings = raw || {};
@@ -58,6 +59,24 @@ function createApp(options = {}) {
 
   app.get('/api/status', (req, res) => {
     res.json(status);
+  });
+
+  // Load code from a public GitHub repository: list, then fetch the chosen files.
+  const github = options.github || createGitHubClient();
+  app.post('/api/repo/list', async (req, res, next) => {
+    try {
+      res.json(await github.listRepo(req.body.url));
+    } catch (error) {
+      next(error);
+    }
+  });
+  app.post('/api/repo/files', async (req, res, next) => {
+    try {
+      const { owner, repo, branch, paths } = req.body;
+      res.json({ files: await github.fetchFiles({ owner, repo, branch, paths }) });
+    } catch (error) {
+      next(error);
+    }
   });
 
   app.post('/api/viva/question', async (req, res, next) => {
