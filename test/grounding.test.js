@@ -102,13 +102,18 @@ function scriptedLlm(replies) {
   };
 }
 
+// Calls that asked for a question (not the separate answer-key call).
+function questionCalls(llm) {
+  return llm.calls.filter((prompt) => prompt.user.includes('TASK: Ask question')).length;
+}
+
 test('a rejected question is asked again once, with the reason in the prompt', async () => {
   const llm = scriptedLlm([
     { file: 'src/queue.c', startLine: 5, endLine: 10, topic: 'Reset', question: 'On line 17, why is `tail` set to NULL?' },
     { file: 'src/queue.c', startLine: 17, endLine: 17, topic: 'Reset', question: 'On line 17, why is `tail` set to NULL?' },
   ]);
   const question = await createAiExaminer(llm).askQuestion({ files, settings: { language: 'en', style: 'friendly', totalQuestions: 5 }, history: [] });
-  assert.equal(llm.calls.length, 2);
+  assert.equal(questionCalls(llm), 2);
   assert.match(llm.calls[1].user, /rejected by the line checker because the question mentions line 17/);
   assert.equal(question.grounding.status, 'regenerated');
   assert.equal(question.startLine, 17);
@@ -118,9 +123,17 @@ test('after two failed attempts the viva continues with an unverified question',
   const bad = { file: 'nowhere.c', startLine: 1, endLine: 2, topic: 'X', question: 'What does this do?' };
   const llm = scriptedLlm([bad, bad]);
   const question = await createAiExaminer(llm).askQuestion({ files, settings: { language: 'en', style: 'friendly', totalQuestions: 5 }, history: [] });
-  assert.equal(llm.calls.length, 2);
+  assert.equal(questionCalls(llm), 2);
   assert.equal(question.grounding.status, 'unverified');
   assert.equal(question.file, 'src/queue.c');
+});
+
+test("a follow-up about a common name goes back to its parent's lines, not the first match", async () => {
+  // `tail` first appears on line 3; the parent question is about dequeue (14-19).
+  const llm = scriptedLlm([{ verdict: 'partial', score: 5, feedback: 'f', modelAnswer: 'm', followUp: { question: 'Why must `tail` be reset?', startLine: 1, endLine: 1 } }]);
+  const parent = { id: 'q1', text: 'Q', topic: 'Dequeue', file: 'src/queue.c', startLine: 14, endLine: 19, isFollowUp: false };
+  const grade = await createAiExaminer(llm).grade({ files, settings: { language: 'en', style: 'friendly', totalQuestions: 5 }, history: [], question: parent, answer: 'x', dontKnow: false, followUpAllowed: true });
+  assert.deepEqual([grade.followUp.startLine, grade.followUp.endLine], [14, 19]);
 });
 
 test('a follow-up stays in its parent file and is re-anchored inside it', async () => {

@@ -37,6 +37,8 @@ const STRINGS = {
     dontKnowAnswer: "(I don't know — teach me)", showAnswer: 'Show a model answer', nothingSolid: 'Nothing fully solid yet — that is what practice is for.',
     nothingGaps: 'No gaps found. Well defended.', examiner: 'Examiner', yourAnswer: 'Your answer', feedbackLabel: 'Feedback',
     headlineHigh: 'You own this code.', headlineMid: 'You own most of this code.', headlineLow: 'Some of this code still owns you.',
+    answerKey: 'Answer key — what the examiner was listening for', wrongClaim: 'Not right:',
+    point_covered: 'covered', point_partial: 'partly covered', point_missing: 'missing',
     linesChecked: '✓ lines checked', linesUnchecked: 'lines not verified',
     linesCheckedTitle: 'CodeViva checked that this question is about the highlighted lines.',
     linesUncheckedTitle: 'The line checker could not confirm these lines; use the line link to look around.',
@@ -438,6 +440,40 @@ function renderQuestionTurn(question) {
   item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
+// The answer key, marked: which expected points the answer covered, plus any
+// technically wrong claims. The score was computed from this on the server.
+const POINT_MARKS = { covered: '✓', partial: '½', missing: '✗' };
+
+function renderChecklist(turn) {
+  const points = turn.points || [];
+  const wrong = turn.wrongClaims || [];
+  if (points.length === 0 && wrong.length === 0) {
+    return null;
+  }
+  const box = el('div', 'checklist');
+  box.appendChild(el('p', 'checklist-title', t('answerKey')));
+  const list = el('ul');
+  for (const point of points) {
+    const item = el('li', `point is-${point.status}`);
+    const mark = el('span', 'point-mark', POINT_MARKS[point.status] || '✗');
+    mark.title = t(`point_${point.status}`);
+    mark.setAttribute('aria-label', t(`point_${point.status}`));
+    item.appendChild(mark);
+    item.appendChild(richText('span', null, point.text));
+    list.appendChild(item);
+  }
+  for (const claim of wrong) {
+    const item = el('li', 'point is-wrong');
+    item.appendChild(el('span', 'point-mark', '!'));
+    const text = richText('span', null, claim);
+    text.prepend(el('strong', null, `${t('wrongClaim')} `));
+    item.appendChild(text);
+    list.appendChild(item);
+  }
+  box.appendChild(list);
+  return box;
+}
+
 function renderAnswerTurn(turn) {
   const answer = el('li', `turn-answer${turn.dontKnow ? ' is-dontknow' : ''}`, turn.dontKnow ? t('dontKnowAnswer') : turn.answer);
   answer.dir = 'auto';
@@ -448,6 +484,10 @@ function renderAnswerTurn(turn) {
   grade.appendChild(el('span', 'score-small', `${turn.score}/10`));
   if (turn.feedback) {
     grade.appendChild(richText('p', 'feedback', turn.feedback));
+  }
+  const checklist = renderChecklist(turn);
+  if (checklist) {
+    grade.appendChild(checklist);
   }
   if (turn.modelAnswer && turn.modelAnswer !== turn.feedback) {
     const details = el('details', 'model-answer');
@@ -544,6 +584,8 @@ async function submitAnswer(dontKnow) {
       score: grade.score,
       feedback: grade.feedback,
       modelAnswer: grade.modelAnswer,
+      points: grade.points || [],
+      wrongClaims: grade.wrongClaims || [],
     };
     state.history.push(turn);
     state.current = null;
@@ -668,6 +710,10 @@ function renderReportTranscript() {
       f.prepend(el('span', 'label', `${t('feedbackLabel')} · ${turn.score}/10`));
       body.appendChild(f);
     }
+    const checklist = renderChecklist(turn);
+    if (checklist) {
+      body.appendChild(checklist);
+    }
     details.appendChild(body);
     container.appendChild(details);
   }
@@ -707,6 +753,16 @@ function reportMarkdown() {
     if (turn.feedback) {
       lines.push('');
       lines.push(`**Feedback:** ${turn.feedback}`);
+    }
+    if (turn.points && turn.points.length > 0) {
+      lines.push('');
+      lines.push('**Answer key:**');
+      for (const point of turn.points) {
+        lines.push(`- ${POINT_MARKS[point.status] || '✗'} ${point.text}`);
+      }
+      for (const claim of turn.wrongClaims || []) {
+        lines.push(`- ! ${t('wrongClaim')} ${claim}`);
+      }
     }
   }
   return lines.join('\n');

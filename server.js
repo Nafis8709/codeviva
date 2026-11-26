@@ -40,6 +40,8 @@ function readHistory(raw) {
     verdict: ['solid', 'partial', 'gap'].includes(turn.verdict) ? turn.verdict : null,
     score: typeof turn.score === 'number' ? turn.score : null,
     feedback: String(turn.feedback || '').slice(0, 2000),
+    // The answer key travels with the question (the server keeps no session).
+    keyPoints: Array.isArray(turn.keyPoints) ? turn.keyPoints.slice(0, 4).map((point) => String(point).slice(0, 300)) : [],
   }));
 }
 

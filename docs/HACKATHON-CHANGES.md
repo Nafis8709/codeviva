@@ -49,4 +49,28 @@ Now (`src/grounding.js`, used by `src/examiners/aiExaminer.js`):
 
 Every question records `grounding: {status, attempts, problems}` so the evaluation can
 count how often questions were grounded first time, repaired, re-asked or unverified.
-Tests: `test/grounding.test.js` (12 tests).
+Tests: `test/grounding.test.js` (13 tests).
+
+### 2. Answer-key grading — the score comes from a checklist, not from the model's mood
+
+Before: the model read the answer and picked any score from 0 to 10.
+
+Now (`src/prompts.js`, `src/examiners/aiExaminer.js`, `src/scoring.js`):
+
+- when the examiner writes a question, it also writes **2–4 key points** a strong answer
+  must contain (the answer key), before the student answers; if the reply has none,
+  one extra call writes them;
+- the grader only marks each key point **covered / partial / missing** and lists
+  **technically wrong claims**; it is never asked for a score;
+- the server computes the score: covered = 1, partial = ½, missing = 0, scaled to 10,
+  minus 3 per wrong claim — the same marks always give the same score, and a confident
+  wrong statement can never be "solid";
+- a follow-up is marked against the points the first answer missed;
+- the page shows the marked answer key after every answer ("what the examiner was
+  listening for"), in the report transcript, and in the Markdown export;
+- the old free-form grading is kept as `grading: 'holistic'` so the evaluation can
+  compare both on the same answers.
+
+Also fixed while testing: a follow-up about a common name (e.g. `tail`) now falls back
+to its parent question's lines instead of the first place that name appears.
+Tests: `test/checklist.test.js` (8 tests).

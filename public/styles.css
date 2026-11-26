@@ -413,6 +413,18 @@ h2 {
 
 .examiner-text { font-size: 1.04rem; margin: 0; }
 
+.checklist { margin-top: 10px; padding: 10px 12px; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--paper-raised); }
+.checklist-title { margin: 0 0 6px; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-muted); font-weight: 600; }
+.checklist ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; }
+.checklist .point { display: grid; grid-template-columns: 1.4em 1fr; gap: 6px; font-size: 0.94rem; line-height: 1.4; }
+.checklist .point-mark { font-weight: 700; text-align: center; }
+.point.is-covered .point-mark { color: var(--green); }
+.point.is-partial .point-mark { color: var(--amber); }
+.point.is-missing .point-mark { color: var(--red); }
+.point.is-missing > span:last-child { color: var(--ink-muted); }
+.point.is-wrong { color: var(--red); }
+.point.is-wrong .point-mark { color: var(--red); }
+
 .turn-answer {
   margin: 0 0 0 18px;
   padding: 10px 14px;

@@ -82,18 +82,75 @@ function questionPrompt({ files, settings, history, rejection }) {
     'startLine and endLine MUST be the lines your question is about, and every identifier you put in `backticks` must appear in those lines.',
     rejection ? `Your previous question was rejected by the line checker because ${rejection}. Pick lines and a question that agree with each other.` : '',
     '',
-    'Return JSON: {"file": "<exact file name from a FILE header>", "startLine": <integer>, "endLine": <integer>, "topic": "<2-5 word label>", "question": "<your question>"}',
+    KEY_POINTS_RULE,
+    '',
+    'Return JSON: {"file": "<exact file name from a FILE header>", "startLine": <integer>, "endLine": <integer>, "topic": "<2-5 word label>", "question": "<your question>", "keyPoints": ["...", "..."]}',
   ].join('\n');
   return { system: systemPrompt(settings), user };
 }
 
-function gradePrompt({ files, settings, history, question, answer, dontKnow, followUpAllowed }) {
+// The answer key, written before the student answers. Grading then only has
+// to decide which points the answer covers.
+const KEY_POINTS_RULE = '"keyPoints": 2 to 4 short sentences, each one fact a strong answer MUST contain — what these exact lines do and why, or what happens in the edge case asked about. Specific to this code, checkable, no overlap between points, nothing the question does not ask. They stay hidden from the student until the answer is marked.';
+
+function keyPointsPrompt({ files, settings, question }) {
+  const examined = getLines(files, question.file, question.startLine, question.endLine)
+    .map((line, i) => `${String(question.startLine + i).padStart(4, ' ')} | ${line}`)
+    .join('\n');
+  const user = [
+    'CODE (every line starts with its line number):',
+    numberCode(files),
+    `QUESTION (about ${rangeLabel(question)}):`,
+    question.text,
+    '',
+    'THOSE LINES:',
+    examined,
+    '',
+    'TASK: Write the answer key for this question.',
+    KEY_POINTS_RULE,
+    '',
+    'Return JSON: {"keyPoints": ["...", "..."]}',
+  ].join('\n');
+  return { system: systemPrompt(settings), user };
+}
+
+function followUpRule(followUpAllowed, what) {
+  return followUpAllowed
+    ? `"followUp": ONLY if ${what}, ask ONE pointed follow-up question that targets exactly the missing piece — like a real examiner pushing back — about the same or directly related lines in the same file: {"question": "...", "startLine": <integer>, "endLine": <integer>}. Otherwise null.`
+    : '"followUp": always null.';
+}
+
+function checklistTask(question, followUpAllowed) {
+  const points = question.keyPoints.map((point, i) => `${i + 1}. ${point}`).join('\n');
+  return {
+    task: [
+      'KEY POINTS (the answer key, written before the student answered):',
+      points,
+      '',
+      'Mark the student answer against the key points. Judge technical meaning only — not wording, grammar, spelling or English fluency (the student may answer in their own language, in English, or a mix).',
+      '"points": one entry per key point, in the same order: {"status": "covered" | "partial" | "missing"}. "covered" = clearly stated or unmistakably implied; "partial" = on the right track but vague or incomplete; "missing" = absent or only restated from the question.',
+      '"wrongClaims": statements in the answer that are technically WRONG about this code (a short quote or paraphrase each). Missing detail is not a wrong claim. Empty list if none.',
+      '"feedback": 1-2 sentences — first what was right, then exactly what was missing or wrong.',
+      '"modelAnswer": the expected answer in 2-4 sentences, built from the key points.',
+      followUpRule(followUpAllowed, 'at least one key point is "partial" or "missing" and some point is covered or partial'),
+    ].join('\n'),
+    shape: '{"points": [{"status": "covered" | "partial" | "missing"}], "wrongClaims": ["..."], "feedback": "...", "modelAnswer": "...", "followUp": null | {"question": "...", "startLine": <integer>, "endLine": <integer>}}',
+  };
+}
+
+// grading: 'checklist' (default when the question has key points) or
+// 'holistic' (the model picks a 0-10 score; kept to compare in evaluation).
+function gradePrompt({ files, settings, history, question, answer, dontKnow, followUpAllowed, grading }) {
   const examined = getLines(files, question.file, question.startLine, question.endLine)
     .map((line, i) => `${String(question.startLine + i).padStart(4, ' ')} | ${line}`)
     .join('\n');
 
+  const useChecklist = !dontKnow && grading !== 'holistic' && Array.isArray(question.keyPoints) && question.keyPoints.length > 0;
   let task;
-  if (dontKnow) {
+  let shape = '{"verdict": "solid" | "partial" | "gap", "score": <integer 0-10>, "feedback": "...", "modelAnswer": "...", "followUp": null | {"question": "...", "startLine": <integer>, "endLine": <integer>}}';
+  if (useChecklist) {
+    ({ task, shape } = checklistTask(question, followUpAllowed));
+  } else if (dontKnow) {
     task = [
       'The student said "I don\'t know — teach me".',
       'Set verdict "gap" and score 0. In "feedback", teach the answer kindly and concretely in 2-4 sentences, specific to these lines. Put the same explanation in "modelAnswer". Set "followUp" to null.',
@@ -105,9 +162,7 @@ function gradePrompt({ files, settings, history, question, answer, dontKnow, fol
       'verdict: "solid" if score >= 8, "partial" if 4-7, "gap" if 3 or less.',
       '"feedback": 1-2 sentences — first what was right, then exactly what was missing or wrong.',
       '"modelAnswer": what the examiner expected, 2-4 sentences, specific to this code. Empty string if the verdict is solid.',
-      followUpAllowed
-        ? '"followUp": ONLY if the verdict is "partial", ask ONE pointed follow-up question that targets exactly the missing piece — like a real examiner pushing back — about the same or directly related lines in the same file: {"question": "...", "startLine": <integer>, "endLine": <integer>}. Otherwise null.'
-        : '"followUp": always null.',
+      followUpRule(followUpAllowed, 'the verdict is "partial"'),
     ].join('\n');
   }
 
@@ -129,7 +184,7 @@ function gradePrompt({ files, settings, history, question, answer, dontKnow, fol
     'TASK:',
     task,
     '',
-    'Return JSON: {"verdict": "solid" | "partial" | "gap", "score": <integer 0-10>, "feedback": "...", "modelAnswer": "...", "followUp": null | {"question": "...", "startLine": <integer>, "endLine": <integer>}}',
+    `Return JSON: ${shape}`,
   ].join('\n');
   return { system: systemPrompt(settings), user };
 }
@@ -150,4 +205,4 @@ function reportPrompt({ files, settings, history }) {
   return { system: systemPrompt(settings), user };
 }
 
-module.exports = { LANGUAGE_NAMES, systemPrompt, questionPrompt, gradePrompt, reportPrompt, historySummary };
+module.exports = { LANGUAGE_NAMES, systemPrompt, questionPrompt, keyPointsPrompt, gradePrompt, reportPrompt, historySummary };

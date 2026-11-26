@@ -256,6 +256,19 @@ function checkQuestion(files, reply, history, options = {}) {
     if (range) {
       foundHere = countFound(rangeText(splitLines(file.content), range.startLine, range.endLine), named);
     }
+    // A follow-up first falls back to its parent question's lines.
+    const near = options.nearRange;
+    if (foundHere === 0 && near && findFile(files, near.file)) {
+      const nearFile = findFile(files, near.file);
+      if (countFound(rangeText(splitLines(nearFile.content), near.startLine, near.endLine), named) > 0) {
+        if (range) {
+          problems.push(`the highlighted lines do not contain ${named.map((n) => `\`${n}\``).join(', ')}`);
+        }
+        range = { file: nearFile.name, startLine: near.startLine, endLine: near.endLine };
+        repaired = true;
+        foundHere = 1;
+      }
+    }
     if (foundHere === 0) {
       const searchIn = options.lockedFile ? [findFile(files, options.lockedFile)].filter(Boolean) : files;
       const best = findBestWindow(searchIn, file, named, Math.max(span, 3));
