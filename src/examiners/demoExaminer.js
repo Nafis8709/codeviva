@@ -359,6 +359,20 @@ async function askQuestion({ files, settings, history }) {
   const language = lang(settings);
   const number = mainQuestions(history).length + 1;
 
+  // Re-test of earlier gaps: ask about the same region again.
+  const target = settings && Array.isArray(settings.targets) ? settings.targets[number - 1] : null;
+  if (target) {
+    const range = clampRange(files, target.file, target.startLine, target.endLine);
+    return {
+      id: `q${number}`,
+      text: `Re-test: walk me through lines ${range.startLine}-${range.endLine} again — what do they do, why are they written this way, and what happens in the edge case?`,
+      topic: target.topic || `Question ${number}`,
+      ...range,
+      isFollowUp: false,
+      demo: true,
+    };
+  }
+
   if (isSampleProject(files)) {
     const step = SAMPLE_SCRIPT[(number - 1) % SAMPLE_SCRIPT.length];
     const sample = findFile(files, SAMPLE_FILE);

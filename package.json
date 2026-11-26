@@ -6,12 +6,21 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "test": "node --test"
+    "test": "node --test",
+    "label": "node scripts/label.js",
+    "eval": "node scripts/eval.js"
   },
   "engines": {
     "node": ">=18.17"
   },
-  "keywords": ["viva", "education", "code-review", "gemini", "devpost", "hackathon"],
+  "keywords": [
+    "viva",
+    "education",
+    "code-review",
+    "gemini",
+    "devpost",
+    "hackathon"
+  ],
   "author": "Nafis Ahmed",
   "license": "MIT",
   "dependencies": {

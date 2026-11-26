@@ -15,6 +15,7 @@ const state = {
   current: null,             // the question being asked
   activeFile: { viva: null, report: null },
   report: null,
+  retest: null,              // { previousScore, regions } while re-testing earlier gaps
   status: null,
   busy: false,
   retryAction: null,
@@ -37,6 +38,22 @@ const STRINGS = {
     dontKnowAnswer: "(I don't know — teach me)", showAnswer: 'Show a model answer', nothingSolid: 'Nothing fully solid yet — that is what practice is for.',
     nothingGaps: 'No gaps found. Well defended.', examiner: 'Examiner', yourAnswer: 'Your answer', feedbackLabel: 'Feedback',
     headlineHigh: 'You own this code.', headlineMid: 'You own most of this code.', headlineLow: 'Some of this code still owns you.',
+    repoLoad: 'Load repo', repoLoading: 'Reading repo…', repoAdd: 'Add files', repoAdding: 'Fetching files…',
+    repoSkipped: 'skipped (dependencies, lockfiles, binaries, hidden folders)', repoTruncated: 'very large repo: only part of it is listed',
+    repoEmpty: 'No code files found here. Try a folder link (…/tree/main/src) or load files directly.',
+    repoAdded: 'Loaded', from: 'from', branch: 'branch', filesWord: 'files', characters: 'characters', max: 'max',
+    kind_test: 'test', kind_other: 'other',
+    retestButton: 'Re-test my gaps', retestLabel: 'Re-test',
+    retestEyebrow: 'Re-test report · score on the re-tested lines', retestFixed: 'You can now defend', retestOfYour: 'of your', retestGaps: 'gaps.',
+    compareRetested: 'Regions re-tested:', compareImproved: 'improved:', compareOnTheseLines: 'score on these lines:',
+    resumeVivaTitle: 'You have an unfinished viva', resumeVivaButton: 'Resume',
+    resumeReportTitle: 'Your last viva report', resumeReportButton: 'Open report', answeredWord: 'questions answered',
+    answerKey: 'Answer key — what the examiner was listening for', wrongClaim: 'Not right:',
+    point_covered: 'covered', point_partial: 'partly covered', point_missing: 'missing',
+    linesChecked: '✓ lines checked', linesUnchecked: 'lines not verified',
+    linesCheckedTitle: 'CodeViva checked that this question is about the highlighted lines.',
+    linesUncheckedTitle: 'The line checker could not confirm these lines; use the line link to look around.',
+    linesFixed: 'Fixed before asking:',
     jump: 'show lines', quitConfirm: 'End the viva now and see the report for the questions answered so far?',
   },
 };
@@ -93,6 +110,7 @@ function splitLines(content) {
 }
 
 function showScreen(name) {
+  state.screen = name;
   for (const screen of ['setup', 'viva', 'report']) {
     $(`screen-${screen}`).hidden = screen !== name;
   }
@@ -227,6 +245,137 @@ function addPasted() {
   renderFileList();
 }
 
+// ---------------------------------------------------------------------------
+// Loading from a public GitHub repository
+// ---------------------------------------------------------------------------
+const repo = { listing: null, selected: new Set(), busy: false };
+
+function formatSize(bytes) {
+  return bytes < 1000 ? `${bytes} B` : `${(bytes / 1000).toFixed(1)} kB`;
+}
+
+function selectedSize() {
+  let total = 0;
+  for (const file of repo.listing.files) {
+    if (repo.selected.has(file.path)) {
+      total += file.size;
+    }
+  }
+  return total;
+}
+
+function setRepoBusy(busy, label) {
+  repo.busy = busy;
+  $('repo-btn').disabled = busy;
+  $('repo-add').disabled = busy;
+  $('repo-btn').textContent = busy && label === 'list' ? t('repoLoading') : t('repoLoad');
+  $('repo-add').textContent = busy && label === 'add' ? t('repoAdding') : `${t('repoAdd')} (${repo.selected.size})`;
+}
+
+function renderRepoBudget() {
+  const used = selectedSize();
+  const budget = repo.listing.budget;
+  const over = used > budget || repo.selected.size > repo.listing.maxFiles;
+  $('budget-fill').style.width = `${Math.min(100, (used / budget) * 100)}%`;
+  $('budget-text').textContent = `${used.toLocaleString('en-US')} / ${budget.toLocaleString('en-US')} ${t('characters')} · ${repo.selected.size} ${t('filesWord')}${repo.selected.size > repo.listing.maxFiles ? ` (${t('max')} ${repo.listing.maxFiles})` : ''}`;
+  document.querySelector('.budget').classList.toggle('is-over', over);
+  $('repo-add').disabled = repo.busy || over || repo.selected.size === 0;
+  $('repo-add').textContent = `${t('repoAdd')} (${repo.selected.size})`;
+}
+
+function renderRepoPicker() {
+  const listing = repo.listing;
+  $('repo-picker').hidden = false;
+  $('repo-name').textContent = `${listing.owner}/${listing.repo}${listing.folder ? `/${listing.folder}` : ''}`;
+  let meta = `${t('branch')} ${listing.branch} · ${listing.files.length} ${t('filesWord')}`;
+  if (listing.skipped > 0) {
+    meta += ` · ${listing.skipped} ${t('repoSkipped')}`;
+  }
+  if (listing.truncated) {
+    meta += ` · ${t('repoTruncated')}`;
+  }
+  $('repo-meta').textContent = meta;
+
+  const list = $('repo-files');
+  list.replaceChildren();
+  if (listing.files.length === 0) {
+    list.appendChild(el('li', 'empty', t('repoEmpty')));
+  }
+  for (const file of listing.files) {
+    const item = el('li');
+    const label = el('label');
+    const box = el('input');
+    box.type = 'checkbox';
+    box.checked = repo.selected.has(file.path);
+    box.addEventListener('change', () => {
+      if (box.checked) {
+        repo.selected.add(file.path);
+      } else {
+        repo.selected.delete(file.path);
+      }
+      renderRepoBudget();
+    });
+    label.appendChild(box);
+    label.appendChild(el('span', null, file.path));
+    label.appendChild(el('span', 'kind', file.kind === 'code' ? '' : t(`kind_${file.kind}`)));
+    label.appendChild(el('span', 'size', formatSize(file.size)));
+    item.appendChild(label);
+    list.appendChild(item);
+  }
+  renderRepoBudget();
+}
+
+async function listRepo(event) {
+  event.preventDefault();
+  const url = $('repo-url').value.trim();
+  if (url === '' || repo.busy) {
+    $('repo-url').focus();
+    return;
+  }
+  showLoadNotice('');
+  setRepoBusy(true, 'list');
+  try {
+    repo.listing = await postJson('/api/repo/list', { url });
+    repo.selected = new Set(repo.listing.files.filter((f) => f.suggested).map((f) => f.path));
+    renderRepoPicker();
+  } catch (error) {
+    $('repo-picker').hidden = true;
+    showLoadNotice(error.message);
+  } finally {
+    setRepoBusy(false);
+    if (repo.listing) {
+      renderRepoBudget();
+    }
+  }
+}
+
+async function addRepoFiles() {
+  if (!repo.listing || repo.selected.size === 0 || repo.busy) {
+    return;
+  }
+  showLoadNotice('');
+  setRepoBusy(true, 'add');
+  try {
+    const { owner, repo: name, branch } = repo.listing;
+    // Keep the repository's order, not the order the boxes were ticked.
+    const paths = repo.listing.files.filter((f) => repo.selected.has(f.path)).map((f) => f.path);
+    const data = await postJson('/api/repo/files', { owner, repo: name, branch, paths });
+    // Repository files replace what was loaded before, so the budget is clear.
+    state.files = [];
+    for (const file of data.files) {
+      addFile(file.name, file.content);
+    }
+    renderFileList();
+    $('repo-picker').hidden = true;
+    showLoadNotice(`${t('repoAdded')} ${data.files.length} ${t('filesWord')} ${t('from')} ${owner}/${name}.`);
+  } catch (error) {
+    showLoadNotice(error.message); // the picker stays open with the same selection
+  } finally {
+    setRepoBusy(false);
+    renderRepoBudget();
+  }
+}
+
 function renderFileList() {
   const list = $('file-list');
   list.replaceChildren();
@@ -281,11 +430,16 @@ function renderTabs(where) {
     return;
   }
   tabs.hidden = false;
+  let activeTab = null;
   for (const file of state.files) {
-    const tab = el('button', null, file.name);
+    const tab = el('button', null, tabLabel(file.name));
     tab.type = 'button';
+    tab.title = file.name;
     tab.setAttribute('role', 'tab');
     tab.classList.toggle('is-active', file.name === state.activeFile[where]);
+    if (file.name === state.activeFile[where]) {
+      activeTab = tab;
+    }
     if (where === 'viva' && state.current && state.current.file === file.name && file.name !== state.activeFile.viva) {
       tab.classList.add('has-question');
     }
@@ -295,6 +449,23 @@ function renderTabs(where) {
     });
     tabs.appendChild(tab);
   }
+  if (activeTab) {
+    // Bring the active tab into view inside the tab strip (not the page).
+    tabs.scrollLeft = Math.max(0, activeTab.offsetLeft - tabs.clientWidth / 3);
+  }
+}
+
+// Tabs show just the file name (the full path is in the tooltip), unless
+// two loaded files share a name.
+function tabLabel(path) {
+  const base = path.split('/').pop();
+  let sameName = 0;
+  for (const file of state.files) {
+    if (file.name.split('/').pop() === base) {
+      sameName++;
+    }
+  }
+  return sameName > 1 ? path : base;
 }
 
 function renderCode(where) {
@@ -380,6 +551,9 @@ function renderProgress() {
   const question = state.current;
   const number = question ? questionNumber(question) : mainCount();
   let label = `${t('question')} ${number} ${t('of')} ${total}`;
+  if (state.retest) {
+    label = `${t('retestLabel')} · ${label}`;
+  }
   if (question && question.isFollowUp) {
     label += ` · ${t('followUp')}`;
   }
@@ -400,6 +574,22 @@ function renderProgress() {
   }
 }
 
+// Shows whether the server's line checker confirmed that the question is about
+// the highlighted lines (only the AI examiner reports this).
+function groundingMark(grounding) {
+  if (!grounding || !grounding.status) {
+    return null;
+  }
+  const verified = grounding.status !== 'unverified';
+  const mark = el('span', `grounding ${verified ? 'is-verified' : 'is-unverified'}`, verified ? t('linesChecked') : t('linesUnchecked'));
+  let title = verified ? t('linesCheckedTitle') : t('linesUncheckedTitle');
+  if (grounding.problems && grounding.problems.length > 0) {
+    title += ` ${t('linesFixed')} ${grounding.problems.join('; ')}.`;
+  }
+  mark.title = title;
+  return mark;
+}
+
 function renderQuestionTurn(question) {
   const item = el('li', 'turn-question');
   const meta = el('div', 'turn-meta', question.isFollowUp ? `${t('examiner')} · ${t('followUp')}` : `${t('examiner')} · ${t('question')} ${questionNumber(question)}`);
@@ -408,10 +598,48 @@ function renderQuestionTurn(question) {
   jump.title = t('jump');
   jump.addEventListener('click', () => showLinesOf('viva', question));
   meta.appendChild(jump);
+  const mark = groundingMark(question.grounding);
+  if (mark) {
+    meta.appendChild(mark);
+  }
   item.appendChild(meta);
   item.appendChild(richText('p', 'examiner-text', question.text));
   $('transcript').appendChild(item);
   item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// The answer key, marked: which expected points the answer covered, plus any
+// technically wrong claims. The score was computed from this on the server.
+const POINT_MARKS = { covered: '✓', partial: '½', missing: '✗' };
+
+function renderChecklist(turn) {
+  const points = turn.points || [];
+  const wrong = turn.wrongClaims || [];
+  if (points.length === 0 && wrong.length === 0) {
+    return null;
+  }
+  const box = el('div', 'checklist');
+  box.appendChild(el('p', 'checklist-title', t('answerKey')));
+  const list = el('ul');
+  for (const point of points) {
+    const item = el('li', `point is-${point.status}`);
+    const mark = el('span', 'point-mark', POINT_MARKS[point.status] || '✗');
+    mark.title = t(`point_${point.status}`);
+    mark.setAttribute('aria-label', t(`point_${point.status}`));
+    item.appendChild(mark);
+    item.appendChild(richText('span', null, point.text));
+    list.appendChild(item);
+  }
+  for (const claim of wrong) {
+    const item = el('li', 'point is-wrong');
+    item.appendChild(el('span', 'point-mark', '!'));
+    const text = richText('span', null, claim);
+    text.prepend(el('strong', null, `${t('wrongClaim')} `));
+    item.appendChild(text);
+    list.appendChild(item);
+  }
+  box.appendChild(list);
+  return box;
 }
 
 function renderAnswerTurn(turn) {
@@ -424,6 +652,10 @@ function renderAnswerTurn(turn) {
   grade.appendChild(el('span', 'score-small', `${turn.score}/10`));
   if (turn.feedback) {
     grade.appendChild(richText('p', 'feedback', turn.feedback));
+  }
+  const checklist = renderChecklist(turn);
+  if (checklist) {
+    grade.appendChild(checklist);
   }
   if (turn.modelAnswer && turn.modelAnswer !== turn.feedback) {
     const details = el('details', 'model-answer');
@@ -466,6 +698,7 @@ function askQuestion(question) {
   setBusy(false);
   $('answer-box').value = '';
   $('answer-box').focus({ preventScroll: true });
+  saveSession();
 }
 
 async function fetchNextQuestion() {
@@ -483,6 +716,106 @@ async function fetchNextQuestion() {
 
 async function startViva() {
   readSettings();
+  state.retest = null;
+  await beginViva();
+}
+
+// ---------------------------------------------------------------------------
+// Re-test: a short viva on only the regions the student could not defend,
+// then a before -> after comparison.
+// ---------------------------------------------------------------------------
+
+// Each examined region with its best attempt (a follow-up can recover it).
+function examinedRegions(history) {
+  const regions = [];
+  for (const turn of history) {
+    if (turn.isFollowUp) {
+      continue;
+    }
+    const followUp = history.find((t2) => t2.isFollowUp && t2.parentId === turn.id);
+    const best = followUp && followUp.score > turn.score ? followUp : turn;
+    regions.push({ file: turn.file, startLine: turn.startLine, endLine: turn.endLine, topic: turn.topic, question: turn.text, verdict: best.verdict, score: best.score });
+  }
+  return regions;
+}
+
+function gapRegions() {
+  return examinedRegions(state.history).filter((region) => region.verdict !== 'solid').slice(0, 5);
+}
+
+async function startRetest() {
+  const gaps = gapRegions();
+  if (gaps.length === 0) {
+    return;
+  }
+  state.retest = {
+    previousScore: state.report ? state.report.score : null,
+    regions: gaps,
+  };
+  state.settings = {
+    ...state.settings,
+    totalQuestions: gaps.length,
+    targets: gaps.map((gap) => ({ file: gap.file, startLine: gap.startLine, endLine: gap.endLine, topic: gap.topic, previousQuestion: gap.question })),
+  };
+  await beginViva();
+}
+
+function averageOutOf100(scores) {
+  if (scores.length === 0) {
+    return 0;
+  }
+  let total = 0;
+  for (const score of scores) {
+    total += score;
+  }
+  return Math.round((total / scores.length) * 10);
+}
+
+function renderComparison() {
+  const box = $('compare');
+  if (!state.retest) {
+    box.hidden = true;
+    return;
+  }
+  box.hidden = false;
+  const after = examinedRegions(state.history);
+  const list = $('compare-list');
+  list.replaceChildren();
+  let improved = 0;
+  const beforeScores = [];
+  const afterScores = [];
+  state.retest.regions.forEach((before, index) => {
+    const now = after[index];
+    beforeScores.push(before.score || 0);
+    if (!now) {
+      return; // re-test ended early
+    }
+    afterScores.push(now.score || 0);
+    if (VERDICT_RANK[now.verdict] > VERDICT_RANK[before.verdict]) {
+      improved++;
+    }
+    const item = el('li');
+    item.appendChild(el('span', `stamp ${before.verdict}`, t(`legend${capitalise(before.verdict)}`)));
+    item.appendChild(el('span', 'arrow', '→'));
+    item.appendChild(el('span', `stamp ${now.verdict}`, t(`legend${capitalise(now.verdict)}`)));
+    const link = richText('button', null, before.topic);
+    link.type = 'button';
+    link.appendChild(el('span', 'ref', `${now.file.split('/').pop()}:${now.startLine}–${now.endLine}`));
+    link.addEventListener('click', () => showLinesOf('report', now));
+    item.appendChild(link);
+    list.appendChild(item);
+  });
+  const answered = afterScores.length;
+  $('compare-summary').textContent = `${t('compareRetested')} ${answered} · ${t('compareImproved')} ${improved} · ${t('compareOnTheseLines')} ${averageOutOf100(beforeScores.slice(0, answered))} → ${averageOutOf100(afterScores)}/100`;
+}
+
+const VERDICT_RANK = { gap: 0, partial: 1, solid: 2 };
+
+function capitalise(word) {
+  return word ? word[0].toUpperCase() + word.slice(1) : '';
+}
+
+async function beginViva() {
   applyLanguage();
   state.history = [];
   state.current = null;
@@ -490,9 +823,11 @@ async function startViva() {
   state.activeFile = { viva: state.files[0].name, report: state.files[0].name };
   $('transcript').replaceChildren();
   hideError();
+  $('resume-card').hidden = true;
   showScreen('viva');
   renderCode('viva');
   renderProgress();
+  saveSession();
   await fetchNextQuestion();
 }
 
@@ -520,9 +855,13 @@ async function submitAnswer(dontKnow) {
       score: grade.score,
       feedback: grade.feedback,
       modelAnswer: grade.modelAnswer,
+      points: grade.points || [],
+      wrongClaims: grade.wrongClaims || [],
     };
     state.history.push(turn);
     state.current = null;
+    $('answer-box').value = '';
+    saveSession();
     renderAnswerTurn(turn);
     renderCode('viva');
     renderProgress();
@@ -561,6 +900,7 @@ async function finishViva() {
     setBusy(false);
     renderReport();
     showScreen('report');
+    saveSession();
   } catch (error) {
     setBusy(false);
     showError(error.message, finishViva);
@@ -576,6 +916,20 @@ function renderReport() {
   } else if (report.score >= 55) {
     headline = t('headlineMid');
   }
+  // A re-test only covers the earlier gaps: say so instead of judging the whole project.
+  let eyebrow = t('reportEyebrow');
+  if (state.retest) {
+    const after = examinedRegions(state.history);
+    let fixed = 0;
+    for (const region of after) {
+      if (region.verdict === 'solid') {
+        fixed++;
+      }
+    }
+    eyebrow = t('retestEyebrow');
+    headline = `${t('retestFixed')} ${fixed} ${t('retestOfYour')} ${state.retest.regions.length} ${t('retestGaps')}`;
+  }
+  document.querySelector('[data-i18n="reportEyebrow"]').textContent = eyebrow;
   $('report-headline').textContent = headline;
   $('report-summary').replaceChildren(document.createTextNode(report.summary || ''));
 
@@ -612,6 +966,10 @@ function renderReport() {
   }
 
   renderReportTranscript();
+  renderComparison();
+  const gapsLeft = gapRegions().length;
+  $('retest-btn').hidden = gapsLeft === 0;
+  $('retest-btn').textContent = `${t('retestButton')} (${gapsLeft})`;
 
   // Open the heatmap on the first gap, or on the first examined region.
   const focus = (report.gaps || [])[0] || state.history[0];
@@ -644,6 +1002,10 @@ function renderReportTranscript() {
       f.prepend(el('span', 'label', `${t('feedbackLabel')} · ${turn.score}/10`));
       body.appendChild(f);
     }
+    const checklist = renderChecklist(turn);
+    if (checklist) {
+      body.appendChild(checklist);
+    }
     details.appendChild(body);
     container.appendChild(details);
   }
@@ -656,6 +1018,17 @@ function reportMarkdown() {
   lines.push('');
   lines.push(`**Ownership score: ${report.score}/100**`);
   lines.push('');
+  if (state.retest) {
+    lines.push(`## ${t('retestLabel')}: before → after`);
+    const after = examinedRegions(state.history);
+    state.retest.regions.forEach((before, index) => {
+      const now = after[index];
+      if (now) {
+        lines.push(`- ${before.topic} (\`${now.file}:${now.startLine}-${now.endLine}\`): ${before.verdict} → ${now.verdict}`);
+      }
+    });
+    lines.push('');
+  }
   lines.push(report.summary || '');
   lines.push('');
   lines.push(`## ${t('owns')}`);
@@ -683,6 +1056,16 @@ function reportMarkdown() {
     if (turn.feedback) {
       lines.push('');
       lines.push(`**Feedback:** ${turn.feedback}`);
+    }
+    if (turn.points && turn.points.length > 0) {
+      lines.push('');
+      lines.push('**Answer key:**');
+      for (const point of turn.points) {
+        lines.push(`- ${POINT_MARKS[point.status] || '✗'} ${point.text}`);
+      }
+      for (const claim of turn.wrongClaims || []) {
+        lines.push(`- ! ${t('wrongClaim')} ${claim}`);
+      }
     }
   }
   return lines.join('\n');
@@ -756,6 +1139,146 @@ function toggleListening() {
 }
 
 // ---------------------------------------------------------------------------
+// Saving the session in this browser, so a refresh, a closed tab or a crash
+// never loses answered questions. Nothing leaves the browser.
+// ---------------------------------------------------------------------------
+const SAVE_KEY = 'codeviva.session.v1';
+let draftTimer = null;
+
+function saveSession() {
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify({
+      version: 1,
+      savedAt: Date.now(),
+      screen: state.screen,
+      files: state.files,
+      settings: state.settings,
+      history: state.history,
+      current: state.current,
+      report: state.report,
+      retest: state.retest,
+      draft: $('answer-box').value,
+    }));
+  } catch (error) {
+    // Storage full or blocked (private mode): the viva still works, it just won't survive a refresh.
+  }
+}
+
+function loadSavedSession() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(SAVE_KEY));
+    if (!saved || saved.version !== 1 || !Array.isArray(saved.files) || saved.files.length === 0 || !Array.isArray(saved.history)) {
+      return null;
+    }
+    if (saved.screen !== 'viva' && saved.screen !== 'report') {
+      return null;
+    }
+    return saved;
+  } catch (error) {
+    return null;
+  }
+}
+
+function clearSavedSession() {
+  try {
+    localStorage.removeItem(SAVE_KEY);
+  } catch (error) {
+    // nothing to clear
+  }
+}
+
+function timeAgo(timestamp) {
+  const minutes = Math.round((Date.now() - timestamp) / 60000);
+  if (minutes < 1) {
+    return 'just now';
+  }
+  if (minutes < 60) {
+    return `${minutes} min ago`;
+  }
+  const hours = Math.round(minutes / 60);
+  if (hours < 48) {
+    return `${hours} h ago`;
+  }
+  return `${Math.round(hours / 24)} days ago`;
+}
+
+function offerResume() {
+  const saved = loadSavedSession();
+  $('resume-card').hidden = !saved;
+  if (!saved) {
+    return;
+  }
+  const fileNames = saved.files.map((f) => f.name).slice(0, 3).join(', ') + (saved.files.length > 3 ? '…' : '');
+  if (saved.screen === 'report' && saved.report) {
+    $('resume-title').textContent = t('resumeReportTitle');
+    $('resume-detail').textContent = `${saved.report.score}/100 · ${fileNames} · ${timeAgo(saved.savedAt)}`;
+    $('resume-btn').textContent = t('resumeReportButton');
+  } else {
+    const answered = saved.history.filter((turn) => !turn.isFollowUp).length;
+    const total = (saved.settings && saved.settings.totalQuestions) || 5;
+    $('resume-title').textContent = t('resumeVivaTitle');
+    $('resume-detail').textContent = `${answered} ${t('of')} ${total} ${t('answeredWord')} · ${fileNames} · ${timeAgo(saved.savedAt)}`;
+    $('resume-btn').textContent = t('resumeVivaButton');
+  }
+}
+
+function setSettingsControls(settings) {
+  $('language').value = settings.language || 'en';
+  const style = document.querySelector(`input[name="style"][value="${settings.style === 'strict' ? 'strict' : 'friendly'}"]`);
+  if (style) {
+    style.checked = true;
+  }
+  const total = document.querySelector(`input[name="total"][value="${settings.totalQuestions === 3 ? 3 : 5}"]`);
+  if (total) {
+    total.checked = true;
+  }
+}
+
+async function resumeSession() {
+  const saved = loadSavedSession();
+  $('resume-card').hidden = true;
+  if (!saved) {
+    return;
+  }
+  state.files = saved.files;
+  state.settings = saved.settings || state.settings;
+  state.history = saved.history;
+  state.current = saved.current || null;
+  state.report = saved.report || null;
+  state.retest = saved.retest || null;
+  state.activeFile = { viva: state.files[0].name, report: state.files[0].name };
+  setSettingsControls(state.settings);
+  renderFileList();
+  applyLanguage();
+  hideError();
+
+  if (saved.screen === 'report' && state.report) {
+    renderReport();
+    showScreen('report');
+    return;
+  }
+
+  // Rebuild the transcript from the saved turns, without asking the AI again.
+  $('transcript').replaceChildren();
+  showScreen('viva');
+  renderCode('viva');
+  for (const turn of state.history) {
+    renderQuestionTurn(turn);
+    renderAnswerTurn(turn);
+  }
+  renderProgress();
+  if (state.current) {
+    askQuestion(state.current);
+    $('answer-box').value = saved.draft || '';
+    saveSession(); // askQuestion saved an empty box; keep the restored draft
+  } else if (mainCount() < state.settings.totalQuestions) {
+    await fetchNextQuestion();
+  } else {
+    await finishViva();
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Wiring
 // ---------------------------------------------------------------------------
 function wireSetup() {
@@ -778,6 +1301,15 @@ function wireSetup() {
   });
 
   $('sample-btn').addEventListener('click', loadSample);
+  $('repo-form').addEventListener('submit', listRepo);
+  $('repo-add').addEventListener('click', addRepoFiles);
+  $('repo-clear').addEventListener('click', () => {
+    repo.selected.clear();
+    renderRepoPicker();
+  });
+  $('repo-cancel').addEventListener('click', () => {
+    $('repo-picker').hidden = true;
+  });
   $('paste-add').addEventListener('click', addPasted);
   $('start-btn').addEventListener('click', startViva);
 }
@@ -806,6 +1338,7 @@ function wireViva() {
       return;
     }
     if (state.history.length === 0) {
+      clearSavedSession();
       showScreen('setup');
       return;
     }
@@ -823,16 +1356,34 @@ function wireViva() {
 
 function wireReport() {
   $('copy-btn').addEventListener('click', copyReport);
+  $('retest-btn').addEventListener('click', startRetest);
   $('restart-btn').addEventListener('click', () => {
     state.history = [];
     state.current = null;
     state.report = null;
+    state.retest = null;
+    clearSavedSession();
     showScreen('setup');
+  });
+}
+
+function wireResume() {
+  $('resume-btn').addEventListener('click', resumeSession);
+  $('discard-btn').addEventListener('click', () => {
+    clearSavedSession();
+    $('resume-card').hidden = true;
+  });
+  // Keep the half-written answer too.
+  $('answer-box').addEventListener('input', () => {
+    clearTimeout(draftTimer);
+    draftTimer = setTimeout(saveSession, 400);
   });
 }
 
 wireSetup();
 wireViva();
 wireReport();
+wireResume();
 renderFileList();
+offerResume();
 loadStatus();

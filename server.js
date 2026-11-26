@@ -10,14 +10,36 @@ const { validateFiles, InputError } = require('./src/code');
 const { computeScore } = require('./src/scoring');
 const { chooseExaminer } = require('./src/config');
 const { LANGUAGE_NAMES } = require('./src/prompts');
+const { createGitHubClient } = require('./src/github');
+
+const MAX_TARGETS = 5;
+
+// A re-test targets the regions the student could not defend last time.
+function readTargets(raw) {
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+  return raw.slice(0, MAX_TARGETS).map((target) => ({
+    file: String(target.file || ''),
+    startLine: Number(target.startLine) || 1,
+    endLine: Number(target.endLine) || Number(target.startLine) || 1,
+    topic: String(target.topic || '').slice(0, 200),
+    previousQuestion: String(target.previousQuestion || '').slice(0, 600),
+  })).filter((target) => target.file !== '');
+}
 
 function readSettings(raw) {
   const settings = raw || {};
-  const totalQuestions = Number(settings.totalQuestions) === 3 ? 3 : 5;
+  const targets = readTargets(settings.targets);
+  let totalQuestions = Number(settings.totalQuestions) === 3 ? 3 : 5;
+  if (targets.length > 0) {
+    totalQuestions = targets.length;
+  }
   return {
     language: Object.prototype.hasOwnProperty.call(LANGUAGE_NAMES, settings.language) ? settings.language : 'en',
     style: settings.style === 'strict' ? 'strict' : 'friendly',
     totalQuestions,
+    targets,
   };
 }
 
@@ -40,6 +62,8 @@ function readHistory(raw) {
     verdict: ['solid', 'partial', 'gap'].includes(turn.verdict) ? turn.verdict : null,
     score: typeof turn.score === 'number' ? turn.score : null,
     feedback: String(turn.feedback || '').slice(0, 2000),
+    // The answer key travels with the question (the server keeps no session).
+    keyPoints: Array.isArray(turn.keyPoints) ? turn.keyPoints.slice(0, 4).map((point) => String(point).slice(0, 300)) : [],
   }));
 }
 
@@ -56,6 +80,24 @@ function createApp(options = {}) {
 
   app.get('/api/status', (req, res) => {
     res.json(status);
+  });
+
+  // Load code from a public GitHub repository: list, then fetch the chosen files.
+  const github = options.github || createGitHubClient();
+  app.post('/api/repo/list', async (req, res, next) => {
+    try {
+      res.json(await github.listRepo(req.body.url));
+    } catch (error) {
+      next(error);
+    }
+  });
+  app.post('/api/repo/files', async (req, res, next) => {
+    try {
+      const { owner, repo, branch, paths } = req.body;
+      res.json({ files: await github.fetchFiles({ owner, repo, branch, paths }) });
+    } catch (error) {
+      next(error);
+    }
   });
 
   app.post('/api/viva/question', async (req, res, next) => {
