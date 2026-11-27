@@ -163,6 +163,12 @@ h2 {
 .repo-picker[hidden] { display: none; }
 .repo-head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
 .repo-hint { margin: 4px 0 8px; font-size: 0.86rem; color: var(--ink-muted); }
+.repo-filter { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+.repo-filter input {
+  flex: 1; min-width: 12em; padding: 6px 9px; font: inherit; font-size: 0.86rem;
+  border: 1px solid var(--rule-strong); border-radius: var(--radius); background: var(--paper); color: var(--ink);
+}
+.repo-files li[hidden] { display: none; }
 .repo-files { list-style: none; margin: 0; padding: 0; max-height: 260px; overflow-y: auto; border-top: 1px solid var(--rule); }
 .repo-files li { border-bottom: 1px solid var(--rule); }
 .repo-files label { display: grid; grid-template-columns: 20px 1fr auto auto; gap: 8px; align-items: center; padding: 5px 4px; cursor: pointer; font-family: var(--font-code); font-size: 0.82rem; }

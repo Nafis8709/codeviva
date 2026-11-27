@@ -69,7 +69,8 @@ What CodeViva adds for the student:
 A browser and code in a public GitHub repo or on disk. Running your own copy needs Node.js
 18.17+ and a free Gemini API key (no card needed); without a key a labelled scripted demo
 runs. Voice answers need Chrome or Edge; typing always works. Private repos: drop the files
-in instead. ⟨fill if hosted: "A hosted copy runs at …, no key needed."⟩
+in instead. **A hosted copy runs at https://codeviva-of2z.onrender.com — no install, no key**
+(free hosting: the first visit after a quiet spell takes up to a minute).
 
 ## What we built during the event [starting point]
 
@@ -84,7 +85,7 @@ During the event (full list with commits: `docs/HACKATHON-CHANGES.md`):
 5. **Load a public GitHub repo by link** — filtered, preselected within budget, with clear failure messages.
 6. **Re-test my gaps** — targeted re-test with before → after.
 
-Tests went from 29 to 64.
+Tests went from 29 to 65.
 
 ## How AI is used in the product [A1a, A1b, A2a, A2b]
 

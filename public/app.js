@@ -319,8 +319,38 @@ function renderRepoPicker() {
     label.appendChild(el('span', null, file.path));
     label.appendChild(el('span', 'kind', file.kind === 'code' ? '' : t(`kind_${file.kind}`)));
     label.appendChild(el('span', 'size', formatSize(file.size)));
+    item.dataset.path = file.path;
     item.appendChild(label);
     list.appendChild(item);
+  }
+  applyRepoFilter();
+  renderRepoBudget();
+}
+
+// Big repositories: show only files whose path contains the filter text
+// (several words = all must match), and tick or untick what is shown.
+function applyRepoFilter() {
+  const words = $('repo-filter').value.toLowerCase().split(/\s+/).filter(Boolean);
+  for (const item of $('repo-files').children) {
+    if (!item.dataset.path) {
+      continue;
+    }
+    const path = item.dataset.path.toLowerCase();
+    item.hidden = !words.every((word) => path.includes(word));
+  }
+}
+
+function setShownFiles(checked) {
+  for (const item of $('repo-files').children) {
+    if (!item.dataset.path || item.hidden) {
+      continue;
+    }
+    if (checked) {
+      repo.selected.add(item.dataset.path);
+    } else {
+      repo.selected.delete(item.dataset.path);
+    }
+    item.querySelector('input').checked = checked;
   }
   renderRepoBudget();
 }
@@ -337,6 +367,7 @@ async function listRepo(event) {
   try {
     repo.listing = await postJson('/api/repo/list', { url });
     repo.selected = new Set(repo.listing.files.filter((f) => f.suggested).map((f) => f.path));
+    $('repo-filter').value = '';
     renderRepoPicker();
   } catch (error) {
     $('repo-picker').hidden = true;
@@ -1307,6 +1338,9 @@ function wireSetup() {
     repo.selected.clear();
     renderRepoPicker();
   });
+  $('repo-filter').addEventListener('input', applyRepoFilter);
+  $('repo-tick-shown').addEventListener('click', () => setShownFiles(true));
+  $('repo-untick-shown').addEventListener('click', () => setShownFiles(false));
   $('repo-cancel').addEventListener('click', () => {
     $('repo-picker').hidden = true;
   });
