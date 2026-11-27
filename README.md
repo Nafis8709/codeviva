@@ -2,6 +2,8 @@
 
 **A mock viva for the code you shipped. CodeViva questions you about the exact lines of your own project, marks each answer against an answer key written before you answer, and lets you re-test what you couldn't defend — so you find your gaps before a real examiner, reviewer or interviewer does.**
 
+**Try it: https://codeviva-of2z.onrender.com** — no key needed (free hosting: the first visit after a quiet spell takes up to a minute to wake up).
+
 Built for the [Global AI Builder's Challenge 2026](https://global-ai-builders-challenge.devpost.com/), as a substantial upgrade of the version made for *Build With AI: Basics* (tag [`basics-baseline`](../../tree/basics-baseline)). What changed during the event: [`docs/HACKATHON-CHANGES.md`](docs/HACKATHON-CHANGES.md).
 
 ![CodeViva viva screen: the examiner asks a follow-up while lines 63–66 are highlighted in the code](docs/screenshots/viva-follow-up.png)
@@ -14,7 +16,7 @@ More and more of that code is written with AI assistants. It works, but the pers
 
 ## What CodeViva does
 
-1. **Load your project** — paste a public **GitHub link** (source files are preselected within the size budget), drop files in, paste a snippet, or try the bundled C sample.
+1. **Load your project** — paste a public **GitHub link** (source files are preselected within the size budget; filter big repos by folder or name), drop files in, paste a snippet, or try the bundled C sample.
 2. **The examiner asks about specific lines**, highlighted in the code panel. A **line checker** verifies that each question really is about the highlighted lines and fixes or re-asks it if not (*✓ lines checked*).
 3. **Answer by typing or speaking** — in English or in your own language (10 languages, including Bangla), or press *I don't know — teach me*.
 4. **Every answer is marked against an answer key** — 2–4 key points the examiner wrote *before* you answered. You see which points you covered (✓), half-covered (½) or missed (✗), and any technically wrong claim. The **score is computed from that checklist on the server**, not picked by the model. Shallow answers get one pointed follow-up.
@@ -102,7 +104,7 @@ codeviva/
 npm test
 ```
 
-64 tests with Node's built-in runner: line numbering and ranges, the line checker, checklist scoring, the AI examiner against a fake model with deliberately messy replies, re-tests, GitHub loading against a fake GitHub, the Gemini/OpenAI clients against a mocked `fetch`, the evaluation's arithmetic, and full vivas through the HTTP API.
+65 tests with Node's built-in runner: line numbering and ranges, the line checker, checklist scoring, the AI examiner against a fake model with deliberately messy replies, re-tests, GitHub loading against a fake GitHub, the Gemini/OpenAI clients against a mocked `fetch`, the evaluation's arithmetic, and full vivas through the HTTP API.
 
 ## Limitations
 

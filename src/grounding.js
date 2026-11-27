@@ -234,14 +234,17 @@ function checkQuestion(files, reply, history, options = {}) {
       repaired = true;
     }
     if (end === null || end < start) {
+      problems.push(`endLine ${reply.endLine} was before startLine ${start}`);
       end = start;
       repaired = true;
     }
     if (end > lineCount) {
+      problems.push(`endLine ${end} is past the end of ${file.name} (${lineCount} lines)`);
       end = lineCount;
       repaired = true;
     }
     if (end - start + 1 > MAX_SPAN) {
+      problems.push(`the highlight (${start}-${end}) was longer than ${MAX_SPAN} lines`);
       end = start + MAX_SPAN - 1;
       repaired = true;
     }

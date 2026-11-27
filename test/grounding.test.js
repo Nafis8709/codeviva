@@ -144,3 +144,12 @@ test('a follow-up stays in its parent file and is re-anchored inside it', async 
   assert.equal(grade.followUp.grounding.status, 'repaired');
   assert.ok(grade.followUp.startLine >= 14 && grade.followUp.startLine <= 18);
 });
+
+test('every repair says why, including a trimmed or clamped highlight', () => {
+  const long = checkQuestion(files, { file: 'src/queue.c', startLine: 5, endLine: 20, question: 'Why `enqueue`?' }, []);
+  assert.equal(long.status, 'repaired');
+  assert.deepEqual([long.range.startLine, long.range.endLine], [5, 16]);
+  assert.match(long.problems.join(' '), /longer than 12 lines/);
+  const past = checkQuestion(files, { file: 'src/helper.c', startLine: 1, endLine: 9, question: 'What does `helper` return?' }, []);
+  assert.match(past.problems.join(' '), /past the end of src\/helper\.c/);
+});

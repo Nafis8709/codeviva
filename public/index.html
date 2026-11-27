@@ -66,6 +66,12 @@
               <span class="muted" id="repo-meta"></span>
             </div>
             <p class="repo-hint">Tick the files your viva should cover. Source files are preselected; tests and config are listed but not ticked.</p>
+            <div class="repo-filter">
+              <label for="repo-filter" class="sr-only">Filter files</label>
+              <input type="search" id="repo-filter" placeholder="Filter, e.g. service or pattern/chain" spellcheck="false" autocomplete="off">
+              <button type="button" class="btn btn-ghost btn-small" id="repo-tick-shown">Tick shown</button>
+              <button type="button" class="btn btn-ghost btn-small" id="repo-untick-shown">Untick shown</button>
+            </div>
             <ul class="repo-files" id="repo-files"></ul>
             <div class="repo-foot">
               <div class="budget" aria-live="polite">
@@ -130,7 +136,7 @@
 
         <div class="start-row">
           <button type="button" class="btn btn-primary" id="start-btn" disabled>Start viva</button>
-          <p class="privacy">Your code is sent only to the configured examiner for this session. Nothing is stored.</p>
+          <p class="privacy">Your code is sent only to the configured AI examiner. Nothing is stored on the server; your viva is saved in this browser so you can resume it.</p>
         </div>
       </div>
     </section>

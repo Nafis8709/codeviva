@@ -133,3 +133,30 @@ re-test report says how many gaps the student can now defend and shows, per regi
 Works after a refresh mid-re-test, in demo mode (scripted re-test question), and in the
 Markdown export. Tests: re-test prompt and region-keeping (`test/checklist.test.js`),
 re-test settings over HTTP (`test/api.test.js`).
+
+### 7. Deployed, tested live with the real model, and three fixes from that test
+
+Deployed on Render (free plan) at **https://codeviva-of2z.onrender.com** with the Gemini key
+as a server-side secret, so visitors need no key.
+
+Live test with real `gemini-3.1-flash-lite` (Nov 27):
+
+- one question on the C sample, three answers to it: a complete answer → 4/4 key points,
+  10/10 solid; a vague answer → ✓ ✗ ½ ✓, 6/10 partial, follow-up on lines 28–34; a
+  confidently wrong Banglish answer → 0/4, gap, both false claims listed as wrong claims;
+- a full strict viva on `Nafis8709/reliefsync` loaded by link (14 files): questions on
+  `VerificationChainBuilder` 6–16, `VerificationHandler` 28–32 and `InventoryService`
+  153–164, all "✓ lines checked"; 3/10 gap, "I don't know" 0/10, 10/10 solid → 43/100;
+- re-test of the 2 gaps: new questions on the same lines → GAP → SOLID twice,
+  "score on these lines: 15 → 100";
+- failures: missing repo → 404 "not found or private"; non-GitHub link → 400.
+
+Fixes from the live test:
+
+1. **Filter in the file picker** — on a 213-file repo the budget filled with UI classes in
+   alphabetical order; you can now filter by path (e.g. `service`, `pattern chain`) and
+   *Tick shown* / *Untick shown*.
+2. **The line checker says why it trimmed a highlight** — a question marked "repaired"
+   listed no reason when its range was clamped or longer than 12 lines.
+3. **Accurate privacy line** — "Nothing is stored" was no longer true once sessions were
+   saved in the browser.
