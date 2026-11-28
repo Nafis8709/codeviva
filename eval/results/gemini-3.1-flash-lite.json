@@ -1,0 +1,3314 @@
+{
+  "model": "gemini-3.1-flash-lite",
+  "date": "2026-11-28T18:50:12.925Z",
+  "answerCount": 30,
+  "args": {
+    "models": [
+      "gemini-3.1-flash-lite"
+    ],
+    "modes": [
+      "checklist",
+      "holistic"
+    ],
+    "repeats": 3,
+    "delay": 4000,
+    "questions": 4,
+    "only": null,
+    "fake": false
+  },
+  "keyPoints": {
+    "queue-dequeue": [
+      "Setting tail to NULL ensures the queue state remains consistent when the last remaining node is removed.",
+      "Without this, the tail pointer would become a dangling pointer, still pointing to the memory of the node that was just freed.",
+      "Subsequent calls to enqueue would attempt to access the invalid tail pointer, causing a segmentation fault or memory corruption."
+    ],
+    "sms-enroll-race": [
+      "A race condition occurs because the check in line 71 and the write in line 73 are not atomic.",
+      "Two concurrent requests could both see the same enrolled count and pass the validation, allowing both to enroll even if only one seat remains.",
+      "This can be prevented by using database-level transactions with appropriate isolation levels or by adding a unique constraint/locking mechanism on the enrollment table."
+    ],
+    "sms-check-order": [
+      "Checking `already_enrolled` first provides a more specific and relevant error message for the user's current state.",
+      "If the checks were swapped, a student already enrolled in a full course would receive a 'No seats left' error instead of being told they are already enrolled.",
+      "The current order ensures that the system prioritizes identity-based conflicts over capacity-based conflicts."
+    ],
+    "relief-handle-skip": [
+      "If the level is already approved, the handler skips its own logic and delegates the request to the next handler in the chain.",
+      "If the current handler is the last in the chain and already approved, it returns a VerificationResult with the outcome VERIFIED and the isComplete flag set to true.",
+      "If every level has been approved, the chain will traverse until the final handler returns the VERIFIED outcome."
+    ],
+    "relief-chain-normal": [
+      "For a NORMAL tier, the chain links only the VolunteerVerificationHandler and the AreaCoordinatorVerificationHandler.",
+      "Because the if-statement on line 10 evaluates to false, the area coordinator's next reference remains null.",
+      "When the area coordinator approves, the handle method returns a VerificationResult with the outcome set to VERIFIED because next is null."
+    ]
+  },
+  "gradings": {
+    "checklist": [
+      {
+        "answerId": "queue-1",
+        "caseId": "queue-dequeue",
+        "label": "solid",
+        "runs": [
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Setting tail to NULL ensures the queue state remains consistent when the last remaining node is removed.",
+                "status": "covered"
+              },
+              {
+                "text": "Without this, the tail pointer would become a dangling pointer, still pointing to the memory of the node that was just freed.",
+                "status": "covered"
+              },
+              {
+                "text": "Subsequent calls to enqueue would attempt to access the invalid tail pointer, causing a segmentation fault or memory corruption.",
+                "status": "covered"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Setting tail to NULL ensures the queue state remains consistent when the last remaining node is removed.",
+                "status": "covered"
+              },
+              {
+                "text": "Without this, the tail pointer would become a dangling pointer, still pointing to the memory of the node that was just freed.",
+                "status": "covered"
+              },
+              {
+                "text": "Subsequent calls to enqueue would attempt to access the invalid tail pointer, causing a segmentation fault or memory corruption.",
+                "status": "covered"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Setting tail to NULL ensures the queue state remains consistent when the last remaining node is removed.",
+                "status": "covered"
+              },
+              {
+                "text": "Without this, the tail pointer would become a dangling pointer, still pointing to the memory of the node that was just freed.",
+                "status": "covered"
+              },
+              {
+                "text": "Subsequent calls to enqueue would attempt to access the invalid tail pointer, causing a segmentation fault or memory corruption.",
+                "status": "covered"
+              }
+            ],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "queue-2",
+        "caseId": "queue-dequeue",
+        "label": "partial",
+        "runs": [
+          {
+            "verdict": "gap",
+            "score": 3,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Setting tail to NULL ensures the queue state remains consistent when the last remaining node is removed.",
+                "status": "covered"
+              },
+              {
+                "text": "Without this, the tail pointer would become a dangling pointer, still pointing to the memory of the node that was just freed.",
+                "status": "missing"
+              },
+              {
+                "text": "Subsequent calls to enqueue would attempt to access the invalid tail pointer, causing a segmentation fault or memory corruption.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "gap",
+            "score": 3,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Setting tail to NULL ensures the queue state remains consistent when the last remaining node is removed.",
+                "status": "covered"
+              },
+              {
+                "text": "Without this, the tail pointer would become a dangling pointer, still pointing to the memory of the node that was just freed.",
+                "status": "missing"
+              },
+              {
+                "text": "Subsequent calls to enqueue would attempt to access the invalid tail pointer, causing a segmentation fault or memory corruption.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "gap",
+            "score": 3,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Setting tail to NULL ensures the queue state remains consistent when the last remaining node is removed.",
+                "status": "covered"
+              },
+              {
+                "text": "Without this, the tail pointer would become a dangling pointer, still pointing to the memory of the node that was just freed.",
+                "status": "missing"
+              },
+              {
+                "text": "Subsequent calls to enqueue would attempt to access the invalid tail pointer, causing a segmentation fault or memory corruption.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "queue-3",
+        "caseId": "queue-dequeue",
+        "label": "solid",
+        "runs": [
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Setting tail to NULL ensures the queue state remains consistent when the last remaining node is removed.",
+                "status": "covered"
+              },
+              {
+                "text": "Without this, the tail pointer would become a dangling pointer, still pointing to the memory of the node that was just freed.",
+                "status": "covered"
+              },
+              {
+                "text": "Subsequent calls to enqueue would attempt to access the invalid tail pointer, causing a segmentation fault or memory corruption.",
+                "status": "covered"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Setting tail to NULL ensures the queue state remains consistent when the last remaining node is removed.",
+                "status": "covered"
+              },
+              {
+                "text": "Without this, the tail pointer would become a dangling pointer, still pointing to the memory of the node that was just freed.",
+                "status": "covered"
+              },
+              {
+                "text": "Subsequent calls to enqueue would attempt to access the invalid tail pointer, causing a segmentation fault or memory corruption.",
+                "status": "covered"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Setting tail to NULL ensures the queue state remains consistent when the last remaining node is removed.",
+                "status": "covered"
+              },
+              {
+                "text": "Without this, the tail pointer would become a dangling pointer, still pointing to the memory of the node that was just freed.",
+                "status": "covered"
+              },
+              {
+                "text": "Subsequent calls to enqueue would attempt to access the invalid tail pointer, causing a segmentation fault or memory corruption.",
+                "status": "covered"
+              }
+            ],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "queue-4",
+        "caseId": "queue-dequeue",
+        "label": "gap",
+        "runs": [
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Setting tail to NULL ensures the queue state remains consistent when the last remaining node is removed.",
+                "status": "missing"
+              },
+              {
+                "text": "Without this, the tail pointer would become a dangling pointer, still pointing to the memory of the node that was just freed.",
+                "status": "missing"
+              },
+              {
+                "text": "Subsequent calls to enqueue would attempt to access the invalid tail pointer, causing a segmentation fault or memory corruption.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": [
+              "It resets tail so that the size counter stays correct."
+            ]
+          },
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Setting tail to NULL ensures the queue state remains consistent when the last remaining node is removed.",
+                "status": "missing"
+              },
+              {
+                "text": "Without this, the tail pointer would become a dangling pointer, still pointing to the memory of the node that was just freed.",
+                "status": "missing"
+              },
+              {
+                "text": "Subsequent calls to enqueue would attempt to access the invalid tail pointer, causing a segmentation fault or memory corruption.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": [
+              "It resets tail so that the size counter stays correct."
+            ]
+          },
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Setting tail to NULL ensures the queue state remains consistent when the last remaining node is removed.",
+                "status": "missing"
+              },
+              {
+                "text": "Without this, the tail pointer would become a dangling pointer, still pointing to the memory of the node that was just freed.",
+                "status": "missing"
+              },
+              {
+                "text": "Subsequent calls to enqueue would attempt to access the invalid tail pointer, causing a segmentation fault or memory corruption.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": [
+              "It resets tail so that the size counter stays correct."
+            ]
+          }
+        ]
+      },
+      {
+        "answerId": "queue-5",
+        "caseId": "queue-dequeue",
+        "label": "gap",
+        "runs": [
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Setting tail to NULL ensures the queue state remains consistent when the last remaining node is removed.",
+                "status": "missing"
+              },
+              {
+                "text": "Without this, the tail pointer would become a dangling pointer, still pointing to the memory of the node that was just freed.",
+                "status": "missing"
+              },
+              {
+                "text": "Subsequent calls to enqueue would attempt to access the invalid tail pointer, causing a segmentation fault or memory corruption.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": [
+              "This frees the tail node"
+            ]
+          },
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Setting tail to NULL ensures the queue state remains consistent when the last remaining node is removed.",
+                "status": "missing"
+              },
+              {
+                "text": "Without this, the tail pointer would become a dangling pointer, still pointing to the memory of the node that was just freed.",
+                "status": "missing"
+              },
+              {
+                "text": "Subsequent calls to enqueue would attempt to access the invalid tail pointer, causing a segmentation fault or memory corruption.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": [
+              "This frees the tail node"
+            ]
+          },
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Setting tail to NULL ensures the queue state remains consistent when the last remaining node is removed.",
+                "status": "missing"
+              },
+              {
+                "text": "Without this, the tail pointer would become a dangling pointer, still pointing to the memory of the node that was just freed.",
+                "status": "missing"
+              },
+              {
+                "text": "Subsequent calls to enqueue would attempt to access the invalid tail pointer, causing a segmentation fault or memory corruption.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": [
+              "This frees the tail node"
+            ]
+          }
+        ]
+      },
+      {
+        "answerId": "queue-6",
+        "caseId": "queue-dequeue",
+        "label": "partial",
+        "runs": [
+          {
+            "verdict": "gap",
+            "score": 3,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Setting tail to NULL ensures the queue state remains consistent when the last remaining node is removed.",
+                "status": "covered"
+              },
+              {
+                "text": "Without this, the tail pointer would become a dangling pointer, still pointing to the memory of the node that was just freed.",
+                "status": "missing"
+              },
+              {
+                "text": "Subsequent calls to enqueue would attempt to access the invalid tail pointer, causing a segmentation fault or memory corruption.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "gap",
+            "score": 3,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Setting tail to NULL ensures the queue state remains consistent when the last remaining node is removed.",
+                "status": "covered"
+              },
+              {
+                "text": "Without this, the tail pointer would become a dangling pointer, still pointing to the memory of the node that was just freed.",
+                "status": "missing"
+              },
+              {
+                "text": "Subsequent calls to enqueue would attempt to access the invalid tail pointer, causing a segmentation fault or memory corruption.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "gap",
+            "score": 3,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Setting tail to NULL ensures the queue state remains consistent when the last remaining node is removed.",
+                "status": "covered"
+              },
+              {
+                "text": "Without this, the tail pointer would become a dangling pointer, still pointing to the memory of the node that was just freed.",
+                "status": "missing"
+              },
+              {
+                "text": "Subsequent calls to enqueue would attempt to access the invalid tail pointer, causing a segmentation fault or memory corruption.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "sms-1",
+        "caseId": "sms-enroll-race",
+        "label": "solid",
+        "runs": [
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "A race condition occurs because the check in line 71 and the write in line 73 are not atomic.",
+                "status": "covered"
+              },
+              {
+                "text": "Two concurrent requests could both see the same enrolled count and pass the validation, allowing both to enroll even if only one seat remains.",
+                "status": "covered"
+              },
+              {
+                "text": "This can be prevented by using database-level transactions with appropriate isolation levels or by adding a unique constraint/locking mechanism on the enrollment table.",
+                "status": "covered"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "A race condition occurs because the check in line 71 and the write in line 73 are not atomic.",
+                "status": "covered"
+              },
+              {
+                "text": "Two concurrent requests could both see the same enrolled count and pass the validation, allowing both to enroll even if only one seat remains.",
+                "status": "covered"
+              },
+              {
+                "text": "This can be prevented by using database-level transactions with appropriate isolation levels or by adding a unique constraint/locking mechanism on the enrollment table.",
+                "status": "covered"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "A race condition occurs because the check in line 71 and the write in line 73 are not atomic.",
+                "status": "covered"
+              },
+              {
+                "text": "Two concurrent requests could both see the same enrolled count and pass the validation, allowing both to enroll even if only one seat remains.",
+                "status": "covered"
+              },
+              {
+                "text": "This can be prevented by using database-level transactions with appropriate isolation levels or by adding a unique constraint/locking mechanism on the enrollment table.",
+                "status": "covered"
+              }
+            ],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "sms-2",
+        "caseId": "sms-enroll-race",
+        "label": "partial",
+        "runs": [
+          {
+            "verdict": "solid",
+            "score": 8,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "A race condition occurs because the check in line 71 and the write in line 73 are not atomic.",
+                "status": "covered"
+              },
+              {
+                "text": "Two concurrent requests could both see the same enrolled count and pass the validation, allowing both to enroll even if only one seat remains.",
+                "status": "covered"
+              },
+              {
+                "text": "This can be prevented by using database-level transactions with appropriate isolation levels or by adding a unique constraint/locking mechanism on the enrollment table.",
+                "status": "partial"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 8,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "A race condition occurs because the check in line 71 and the write in line 73 are not atomic.",
+                "status": "covered"
+              },
+              {
+                "text": "Two concurrent requests could both see the same enrolled count and pass the validation, allowing both to enroll even if only one seat remains.",
+                "status": "covered"
+              },
+              {
+                "text": "This can be prevented by using database-level transactions with appropriate isolation levels or by adding a unique constraint/locking mechanism on the enrollment table.",
+                "status": "partial"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 8,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "A race condition occurs because the check in line 71 and the write in line 73 are not atomic.",
+                "status": "covered"
+              },
+              {
+                "text": "Two concurrent requests could both see the same enrolled count and pass the validation, allowing both to enroll even if only one seat remains.",
+                "status": "covered"
+              },
+              {
+                "text": "This can be prevented by using database-level transactions with appropriate isolation levels or by adding a unique constraint/locking mechanism on the enrollment table.",
+                "status": "partial"
+              }
+            ],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "sms-3",
+        "caseId": "sms-enroll-race",
+        "label": "gap",
+        "runs": [
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "A race condition occurs because the check in line 71 and the write in line 73 are not atomic.",
+                "status": "missing"
+              },
+              {
+                "text": "Two concurrent requests could both see the same enrolled count and pass the validation, allowing both to enroll even if only one seat remains.",
+                "status": "missing"
+              },
+              {
+                "text": "This can be prevented by using database-level transactions with appropriate isolation levels or by adding a unique constraint/locking mechanism on the enrollment table.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": [
+              "Nothing goes wrong"
+            ]
+          },
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "A race condition occurs because the check in line 71 and the write in line 73 are not atomic.",
+                "status": "missing"
+              },
+              {
+                "text": "Two concurrent requests could both see the same enrolled count and pass the validation, allowing both to enroll even if only one seat remains.",
+                "status": "missing"
+              },
+              {
+                "text": "This can be prevented by using database-level transactions with appropriate isolation levels or by adding a unique constraint/locking mechanism on the enrollment table.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": [
+              "Nothing goes wrong"
+            ]
+          },
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "A race condition occurs because the check in line 71 and the write in line 73 are not atomic.",
+                "status": "missing"
+              },
+              {
+                "text": "Two concurrent requests could both see the same enrolled count and pass the validation, allowing both to enroll even if only one seat remains.",
+                "status": "missing"
+              },
+              {
+                "text": "This can be prevented by using database-level transactions with appropriate isolation levels or by adding a unique constraint/locking mechanism on the enrollment table.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": [
+              "Nothing goes wrong, because check_can_enroll raises Conflict when there are no seats left."
+            ]
+          }
+        ]
+      },
+      {
+        "answerId": "sms-4",
+        "caseId": "sms-enroll-race",
+        "label": "solid",
+        "runs": [
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "A race condition occurs because the check in line 71 and the write in line 73 are not atomic.",
+                "status": "covered"
+              },
+              {
+                "text": "Two concurrent requests could both see the same enrolled count and pass the validation, allowing both to enroll even if only one seat remains.",
+                "status": "covered"
+              },
+              {
+                "text": "This can be prevented by using database-level transactions with appropriate isolation levels or by adding a unique constraint/locking mechanism on the enrollment table.",
+                "status": "covered"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "A race condition occurs because the check in line 71 and the write in line 73 are not atomic.",
+                "status": "covered"
+              },
+              {
+                "text": "Two concurrent requests could both see the same enrolled count and pass the validation, allowing both to enroll even if only one seat remains.",
+                "status": "covered"
+              },
+              {
+                "text": "This can be prevented by using database-level transactions with appropriate isolation levels or by adding a unique constraint/locking mechanism on the enrollment table.",
+                "status": "covered"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "A race condition occurs because the check in line 71 and the write in line 73 are not atomic.",
+                "status": "covered"
+              },
+              {
+                "text": "Two concurrent requests could both see the same enrolled count and pass the validation, allowing both to enroll even if only one seat remains.",
+                "status": "covered"
+              },
+              {
+                "text": "This can be prevented by using database-level transactions with appropriate isolation levels or by adding a unique constraint/locking mechanism on the enrollment table.",
+                "status": "covered"
+              }
+            ],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "sms-5",
+        "caseId": "sms-enroll-race",
+        "label": "gap",
+        "runs": [
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "A race condition occurs because the check in line 71 and the write in line 73 are not atomic.",
+                "status": "missing"
+              },
+              {
+                "text": "Two concurrent requests could both see the same enrolled count and pass the validation, allowing both to enroll even if only one seat remains.",
+                "status": "missing"
+              },
+              {
+                "text": "This can be prevented by using database-level transactions with appropriate isolation levels or by adding a unique constraint/locking mechanism on the enrollment table.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": [
+              "The same student could end up enrolled twice in the course."
+            ]
+          },
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "A race condition occurs because the check in line 71 and the write in line 73 are not atomic.",
+                "status": "missing"
+              },
+              {
+                "text": "Two concurrent requests could both see the same enrolled count and pass the validation, allowing both to enroll even if only one seat remains.",
+                "status": "missing"
+              },
+              {
+                "text": "This can be prevented by using database-level transactions with appropriate isolation levels or by adding a unique constraint/locking mechanism on the enrollment table.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": [
+              "The same student could end up enrolled twice in the course."
+            ]
+          },
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "A race condition occurs because the check in line 71 and the write in line 73 are not atomic.",
+                "status": "missing"
+              },
+              {
+                "text": "Two concurrent requests could both see the same enrolled count and pass the validation, allowing both to enroll even if only one seat remains.",
+                "status": "missing"
+              },
+              {
+                "text": "This can be prevented by using database-level transactions with appropriate isolation levels or by adding a unique constraint/locking mechanism on the enrollment table.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": [
+              "The same student could end up enrolled twice in the course."
+            ]
+          }
+        ]
+      },
+      {
+        "answerId": "sms-6",
+        "caseId": "sms-enroll-race",
+        "label": "gap",
+        "runs": [
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "A race condition occurs because the check in line 71 and the write in line 73 are not atomic.",
+                "status": "missing"
+              },
+              {
+                "text": "Two concurrent requests could both see the same enrolled count and pass the validation, allowing both to enroll even if only one seat remains.",
+                "status": "missing"
+              },
+              {
+                "text": "This can be prevented by using database-level transactions with appropriate isolation levels or by adding a unique constraint/locking mechanism on the enrollment table.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "A race condition occurs because the check in line 71 and the write in line 73 are not atomic.",
+                "status": "missing"
+              },
+              {
+                "text": "Two concurrent requests could both see the same enrolled count and pass the validation, allowing both to enroll even if only one seat remains.",
+                "status": "missing"
+              },
+              {
+                "text": "This can be prevented by using database-level transactions with appropriate isolation levels or by adding a unique constraint/locking mechanism on the enrollment table.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": [
+              "The server crashing is the primary concern here."
+            ]
+          },
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "A race condition occurs because the check in line 71 and the write in line 73 are not atomic.",
+                "status": "missing"
+              },
+              {
+                "text": "Two concurrent requests could both see the same enrolled count and pass the validation, allowing both to enroll even if only one seat remains.",
+                "status": "missing"
+              },
+              {
+                "text": "This can be prevented by using database-level transactions with appropriate isolation levels or by adding a unique constraint/locking mechanism on the enrollment table.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": [
+              "Use try except to catch the error so the server does not crash."
+            ]
+          }
+        ]
+      },
+      {
+        "answerId": "order-1",
+        "caseId": "sms-check-order",
+        "label": "solid",
+        "runs": [
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Checking `already_enrolled` first provides a more specific and relevant error message for the user's current state.",
+                "status": "covered"
+              },
+              {
+                "text": "If the checks were swapped, a student already enrolled in a full course would receive a 'No seats left' error instead of being told they are already enrolled.",
+                "status": "covered"
+              },
+              {
+                "text": "The current order ensures that the system prioritizes identity-based conflicts over capacity-based conflicts.",
+                "status": "covered"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Checking `already_enrolled` first provides a more specific and relevant error message for the user's current state.",
+                "status": "covered"
+              },
+              {
+                "text": "If the checks were swapped, a student already enrolled in a full course would receive a 'No seats left' error instead of being told they are already enrolled.",
+                "status": "covered"
+              },
+              {
+                "text": "The current order ensures that the system prioritizes identity-based conflicts over capacity-based conflicts.",
+                "status": "covered"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Checking `already_enrolled` first provides a more specific and relevant error message for the user's current state.",
+                "status": "covered"
+              },
+              {
+                "text": "If the checks were swapped, a student already enrolled in a full course would receive a 'No seats left' error instead of being told they are already enrolled.",
+                "status": "covered"
+              },
+              {
+                "text": "The current order ensures that the system prioritizes identity-based conflicts over capacity-based conflicts.",
+                "status": "covered"
+              }
+            ],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "order-2",
+        "caseId": "sms-check-order",
+        "label": "gap",
+        "runs": [
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Checking `already_enrolled` first provides a more specific and relevant error message for the user's current state.",
+                "status": "missing"
+              },
+              {
+                "text": "If the checks were swapped, a student already enrolled in a full course would receive a 'No seats left' error instead of being told they are already enrolled.",
+                "status": "missing"
+              },
+              {
+                "text": "The current order ensures that the system prioritizes identity-based conflicts over capacity-based conflicts.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Checking `already_enrolled` first provides a more specific and relevant error message for the user's current state.",
+                "status": "missing"
+              },
+              {
+                "text": "If the checks were swapped, a student already enrolled in a full course would receive a 'No seats left' error instead of being told they are already enrolled.",
+                "status": "missing"
+              },
+              {
+                "text": "The current order ensures that the system prioritizes identity-based conflicts over capacity-based conflicts.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Checking `already_enrolled` first provides a more specific and relevant error message for the user's current state.",
+                "status": "missing"
+              },
+              {
+                "text": "If the checks were swapped, a student already enrolled in a full course would receive a 'No seats left' error instead of being told they are already enrolled.",
+                "status": "missing"
+              },
+              {
+                "text": "The current order ensures that the system prioritizes identity-based conflicts over capacity-based conflicts.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "order-3",
+        "caseId": "sms-check-order",
+        "label": "partial",
+        "runs": [
+          {
+            "verdict": "gap",
+            "score": 3,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Checking `already_enrolled` first provides a more specific and relevant error message for the user's current state.",
+                "status": "missing"
+              },
+              {
+                "text": "If the checks were swapped, a student already enrolled in a full course would receive a 'No seats left' error instead of being told they are already enrolled.",
+                "status": "covered"
+              },
+              {
+                "text": "The current order ensures that the system prioritizes identity-based conflicts over capacity-based conflicts.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "gap",
+            "score": 3,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Checking `already_enrolled` first provides a more specific and relevant error message for the user's current state.",
+                "status": "missing"
+              },
+              {
+                "text": "If the checks were swapped, a student already enrolled in a full course would receive a 'No seats left' error instead of being told they are already enrolled.",
+                "status": "covered"
+              },
+              {
+                "text": "The current order ensures that the system prioritizes identity-based conflicts over capacity-based conflicts.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "gap",
+            "score": 3,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Checking `already_enrolled` first provides a more specific and relevant error message for the user's current state.",
+                "status": "missing"
+              },
+              {
+                "text": "If the checks were swapped, a student already enrolled in a full course would receive a 'No seats left' error instead of being told they are already enrolled.",
+                "status": "covered"
+              },
+              {
+                "text": "The current order ensures that the system prioritizes identity-based conflicts over capacity-based conflicts.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "order-4",
+        "caseId": "sms-check-order",
+        "label": "gap",
+        "runs": [
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Checking `already_enrolled` first provides a more specific and relevant error message for the user's current state.",
+                "status": "missing"
+              },
+              {
+                "text": "If the checks were swapped, a student already enrolled in a full course would receive a 'No seats left' error instead of being told they are already enrolled.",
+                "status": "partial"
+              },
+              {
+                "text": "The current order ensures that the system prioritizes identity-based conflicts over capacity-based conflicts.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": [
+              "If the order were swapped, the student would be enrolled twice."
+            ]
+          },
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Checking `already_enrolled` first provides a more specific and relevant error message for the user's current state.",
+                "status": "missing"
+              },
+              {
+                "text": "If the checks were swapped, a student already enrolled in a full course would receive a 'No seats left' error instead of being told they are already enrolled.",
+                "status": "partial"
+              },
+              {
+                "text": "The current order ensures that the system prioritizes identity-based conflicts over capacity-based conflicts.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": [
+              "If the order were swapped, the student would be enrolled twice."
+            ]
+          },
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Checking `already_enrolled` first provides a more specific and relevant error message for the user's current state.",
+                "status": "missing"
+              },
+              {
+                "text": "If the checks were swapped, a student already enrolled in a full course would receive a 'No seats left' error instead of being told they are already enrolled.",
+                "status": "missing"
+              },
+              {
+                "text": "The current order ensures that the system prioritizes identity-based conflicts over capacity-based conflicts.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": [
+              "If the order were swapped, the student would be enrolled twice."
+            ]
+          }
+        ]
+      },
+      {
+        "answerId": "order-5",
+        "caseId": "sms-check-order",
+        "label": "gap",
+        "runs": [
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Checking `already_enrolled` first provides a more specific and relevant error message for the user's current state.",
+                "status": "missing"
+              },
+              {
+                "text": "If the checks were swapped, a student already enrolled in a full course would receive a 'No seats left' error instead of being told they are already enrolled.",
+                "status": "missing"
+              },
+              {
+                "text": "The current order ensures that the system prioritizes identity-based conflicts over capacity-based conflicts.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": [
+              "Checking already_enrolled first avoids a database query for the seat count"
+            ]
+          },
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Checking `already_enrolled` first provides a more specific and relevant error message for the user's current state.",
+                "status": "missing"
+              },
+              {
+                "text": "If the checks were swapped, a student already enrolled in a full course would receive a 'No seats left' error instead of being told they are already enrolled.",
+                "status": "missing"
+              },
+              {
+                "text": "The current order ensures that the system prioritizes identity-based conflicts over capacity-based conflicts.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": [
+              "Checking already_enrolled first avoids a database query for the seat count"
+            ]
+          },
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Checking `already_enrolled` first provides a more specific and relevant error message for the user's current state.",
+                "status": "missing"
+              },
+              {
+                "text": "If the checks were swapped, a student already enrolled in a full course would receive a 'No seats left' error instead of being told they are already enrolled.",
+                "status": "missing"
+              },
+              {
+                "text": "The current order ensures that the system prioritizes identity-based conflicts over capacity-based conflicts.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": [
+              "Checking already_enrolled first avoids a database query for the seat count"
+            ]
+          }
+        ]
+      },
+      {
+        "answerId": "order-6",
+        "caseId": "sms-check-order",
+        "label": "solid",
+        "runs": [
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Checking `already_enrolled` first provides a more specific and relevant error message for the user's current state.",
+                "status": "covered"
+              },
+              {
+                "text": "If the checks were swapped, a student already enrolled in a full course would receive a 'No seats left' error instead of being told they are already enrolled.",
+                "status": "covered"
+              },
+              {
+                "text": "The current order ensures that the system prioritizes identity-based conflicts over capacity-based conflicts.",
+                "status": "covered"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Checking `already_enrolled` first provides a more specific and relevant error message for the user's current state.",
+                "status": "covered"
+              },
+              {
+                "text": "If the checks were swapped, a student already enrolled in a full course would receive a 'No seats left' error instead of being told they are already enrolled.",
+                "status": "covered"
+              },
+              {
+                "text": "The current order ensures that the system prioritizes identity-based conflicts over capacity-based conflicts.",
+                "status": "covered"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "Checking `already_enrolled` first provides a more specific and relevant error message for the user's current state.",
+                "status": "covered"
+              },
+              {
+                "text": "If the checks were swapped, a student already enrolled in a full course would receive a 'No seats left' error instead of being told they are already enrolled.",
+                "status": "covered"
+              },
+              {
+                "text": "The current order ensures that the system prioritizes identity-based conflicts over capacity-based conflicts.",
+                "status": "covered"
+              }
+            ],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "relief-1",
+        "caseId": "relief-handle-skip",
+        "label": "solid",
+        "runs": [
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "If the level is already approved, the handler skips its own logic and delegates the request to the next handler in the chain.",
+                "status": "covered"
+              },
+              {
+                "text": "If the current handler is the last in the chain and already approved, it returns a VerificationResult with the outcome VERIFIED and the isComplete flag set to true.",
+                "status": "covered"
+              },
+              {
+                "text": "If every level has been approved, the chain will traverse until the final handler returns the VERIFIED outcome.",
+                "status": "covered"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "If the level is already approved, the handler skips its own logic and delegates the request to the next handler in the chain.",
+                "status": "covered"
+              },
+              {
+                "text": "If the current handler is the last in the chain and already approved, it returns a VerificationResult with the outcome VERIFIED and the isComplete flag set to true.",
+                "status": "covered"
+              },
+              {
+                "text": "If every level has been approved, the chain will traverse until the final handler returns the VERIFIED outcome.",
+                "status": "covered"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "If the level is already approved, the handler skips its own logic and delegates the request to the next handler in the chain.",
+                "status": "covered"
+              },
+              {
+                "text": "If the current handler is the last in the chain and already approved, it returns a VerificationResult with the outcome VERIFIED and the isComplete flag set to true.",
+                "status": "covered"
+              },
+              {
+                "text": "If every level has been approved, the chain will traverse until the final handler returns the VERIFIED outcome.",
+                "status": "covered"
+              }
+            ],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "relief-2",
+        "caseId": "relief-handle-skip",
+        "label": "partial",
+        "runs": [
+          {
+            "verdict": "solid",
+            "score": 8,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "If the level is already approved, the handler skips its own logic and delegates the request to the next handler in the chain.",
+                "status": "covered"
+              },
+              {
+                "text": "If the current handler is the last in the chain and already approved, it returns a VerificationResult with the outcome VERIFIED and the isComplete flag set to true.",
+                "status": "covered"
+              },
+              {
+                "text": "If every level has been approved, the chain will traverse until the final handler returns the VERIFIED outcome.",
+                "status": "partial"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "If the level is already approved, the handler skips its own logic and delegates the request to the next handler in the chain.",
+                "status": "covered"
+              },
+              {
+                "text": "If the current handler is the last in the chain and already approved, it returns a VerificationResult with the outcome VERIFIED and the isComplete flag set to true.",
+                "status": "covered"
+              },
+              {
+                "text": "If every level has been approved, the chain will traverse until the final handler returns the VERIFIED outcome.",
+                "status": "covered"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "If the level is already approved, the handler skips its own logic and delegates the request to the next handler in the chain.",
+                "status": "covered"
+              },
+              {
+                "text": "If the current handler is the last in the chain and already approved, it returns a VerificationResult with the outcome VERIFIED and the isComplete flag set to true.",
+                "status": "covered"
+              },
+              {
+                "text": "If every level has been approved, the chain will traverse until the final handler returns the VERIFIED outcome.",
+                "status": "covered"
+              }
+            ],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "relief-3",
+        "caseId": "relief-handle-skip",
+        "label": "gap",
+        "runs": [
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "If the level is already approved, the handler skips its own logic and delegates the request to the next handler in the chain.",
+                "status": "missing"
+              },
+              {
+                "text": "If the current handler is the last in the chain and already approved, it returns a VerificationResult with the outcome VERIFIED and the isComplete flag set to true.",
+                "status": "missing"
+              },
+              {
+                "text": "If every level has been approved, the chain will traverse until the final handler returns the VERIFIED outcome.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": [
+              "It throws an AuthorizationException because the session role does not match this handler's role."
+            ]
+          },
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "If the level is already approved, the handler skips its own logic and delegates the request to the next handler in the chain.",
+                "status": "missing"
+              },
+              {
+                "text": "If the current handler is the last in the chain and already approved, it returns a VerificationResult with the outcome VERIFIED and the isComplete flag set to true.",
+                "status": "missing"
+              },
+              {
+                "text": "If every level has been approved, the chain will traverse until the final handler returns the VERIFIED outcome.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": [
+              "It throws an AuthorizationException because the session role does not match this handler's role."
+            ]
+          },
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "If the level is already approved, the handler skips its own logic and delegates the request to the next handler in the chain.",
+                "status": "missing"
+              },
+              {
+                "text": "If the current handler is the last in the chain and already approved, it returns a VerificationResult with the outcome VERIFIED and the isComplete flag set to true.",
+                "status": "missing"
+              },
+              {
+                "text": "If every level has been approved, the chain will traverse until the final handler returns the VERIFIED outcome.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": [
+              "It throws an AuthorizationException because the session role does not match this handler's role."
+            ]
+          }
+        ]
+      },
+      {
+        "answerId": "relief-4",
+        "caseId": "relief-handle-skip",
+        "label": "solid",
+        "runs": [
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "If the level is already approved, the handler skips its own logic and delegates the request to the next handler in the chain.",
+                "status": "covered"
+              },
+              {
+                "text": "If the current handler is the last in the chain and already approved, it returns a VerificationResult with the outcome VERIFIED and the isComplete flag set to true.",
+                "status": "covered"
+              },
+              {
+                "text": "If every level has been approved, the chain will traverse until the final handler returns the VERIFIED outcome.",
+                "status": "covered"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "If the level is already approved, the handler skips its own logic and delegates the request to the next handler in the chain.",
+                "status": "covered"
+              },
+              {
+                "text": "If the current handler is the last in the chain and already approved, it returns a VerificationResult with the outcome VERIFIED and the isComplete flag set to true.",
+                "status": "covered"
+              },
+              {
+                "text": "If every level has been approved, the chain will traverse until the final handler returns the VERIFIED outcome.",
+                "status": "covered"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "If the level is already approved, the handler skips its own logic and delegates the request to the next handler in the chain.",
+                "status": "covered"
+              },
+              {
+                "text": "If the current handler is the last in the chain and already approved, it returns a VerificationResult with the outcome VERIFIED and the isComplete flag set to true.",
+                "status": "covered"
+              },
+              {
+                "text": "If every level has been approved, the chain will traverse until the final handler returns the VERIFIED outcome.",
+                "status": "covered"
+              }
+            ],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "relief-5",
+        "caseId": "relief-handle-skip",
+        "label": "gap",
+        "runs": [
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "If the level is already approved, the handler skips its own logic and delegates the request to the next handler in the chain.",
+                "status": "missing"
+              },
+              {
+                "text": "If the current handler is the last in the chain and already approved, it returns a VerificationResult with the outcome VERIFIED and the isComplete flag set to true.",
+                "status": "covered"
+              },
+              {
+                "text": "If every level has been approved, the chain will traverse until the final handler returns the VERIFIED outcome.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": [
+              "It returns VERIFIED immediately."
+            ]
+          },
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "If the level is already approved, the handler skips its own logic and delegates the request to the next handler in the chain.",
+                "status": "missing"
+              },
+              {
+                "text": "If the current handler is the last in the chain and already approved, it returns a VerificationResult with the outcome VERIFIED and the isComplete flag set to true.",
+                "status": "covered"
+              },
+              {
+                "text": "If every level has been approved, the chain will traverse until the final handler returns the VERIFIED outcome.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": [
+              "It returns VERIFIED immediately."
+            ]
+          },
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "If the level is already approved, the handler skips its own logic and delegates the request to the next handler in the chain.",
+                "status": "missing"
+              },
+              {
+                "text": "If the current handler is the last in the chain and already approved, it returns a VerificationResult with the outcome VERIFIED and the isComplete flag set to true.",
+                "status": "covered"
+              },
+              {
+                "text": "If every level has been approved, the chain will traverse until the final handler returns the VERIFIED outcome.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": [
+              "It returns VERIFIED immediately."
+            ]
+          }
+        ]
+      },
+      {
+        "answerId": "relief-6",
+        "caseId": "relief-handle-skip",
+        "label": "gap",
+        "runs": [
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "If the level is already approved, the handler skips its own logic and delegates the request to the next handler in the chain.",
+                "status": "missing"
+              },
+              {
+                "text": "If the current handler is the last in the chain and already approved, it returns a VerificationResult with the outcome VERIFIED and the isComplete flag set to true.",
+                "status": "missing"
+              },
+              {
+                "text": "If every level has been approved, the chain will traverse until the final handler returns the VERIFIED outcome.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "If the level is already approved, the handler skips its own logic and delegates the request to the next handler in the chain.",
+                "status": "missing"
+              },
+              {
+                "text": "If the current handler is the last in the chain and already approved, it returns a VerificationResult with the outcome VERIFIED and the isComplete flag set to true.",
+                "status": "missing"
+              },
+              {
+                "text": "If every level has been approved, the chain will traverse until the final handler returns the VERIFIED outcome.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "If the level is already approved, the handler skips its own logic and delegates the request to the next handler in the chain.",
+                "status": "missing"
+              },
+              {
+                "text": "If the current handler is the last in the chain and already approved, it returns a VerificationResult with the outcome VERIFIED and the isComplete flag set to true.",
+                "status": "missing"
+              },
+              {
+                "text": "If every level has been approved, the chain will traverse until the final handler returns the VERIFIED outcome.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "chain-1",
+        "caseId": "relief-chain-normal",
+        "label": "solid",
+        "runs": [
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "For a NORMAL tier, the chain links only the VolunteerVerificationHandler and the AreaCoordinatorVerificationHandler.",
+                "status": "covered"
+              },
+              {
+                "text": "Because the if-statement on line 10 evaluates to false, the area coordinator's next reference remains null.",
+                "status": "covered"
+              },
+              {
+                "text": "When the area coordinator approves, the handle method returns a VerificationResult with the outcome set to VERIFIED because next is null.",
+                "status": "covered"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "For a NORMAL tier, the chain links only the VolunteerVerificationHandler and the AreaCoordinatorVerificationHandler.",
+                "status": "covered"
+              },
+              {
+                "text": "Because the if-statement on line 10 evaluates to false, the area coordinator's next reference remains null.",
+                "status": "covered"
+              },
+              {
+                "text": "When the area coordinator approves, the handle method returns a VerificationResult with the outcome set to VERIFIED because next is null.",
+                "status": "covered"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "For a NORMAL tier, the chain links only the VolunteerVerificationHandler and the AreaCoordinatorVerificationHandler.",
+                "status": "covered"
+              },
+              {
+                "text": "Because the if-statement on line 10 evaluates to false, the area coordinator's next reference remains null.",
+                "status": "covered"
+              },
+              {
+                "text": "When the area coordinator approves, the handle method returns a VerificationResult with the outcome set to VERIFIED because next is null.",
+                "status": "covered"
+              }
+            ],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "chain-2",
+        "caseId": "relief-chain-normal",
+        "label": "partial",
+        "runs": [
+          {
+            "verdict": "gap",
+            "score": 3,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "For a NORMAL tier, the chain links only the VolunteerVerificationHandler and the AreaCoordinatorVerificationHandler.",
+                "status": "covered"
+              },
+              {
+                "text": "Because the if-statement on line 10 evaluates to false, the area coordinator's next reference remains null.",
+                "status": "missing"
+              },
+              {
+                "text": "When the area coordinator approves, the handle method returns a VerificationResult with the outcome set to VERIFIED because next is null.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "gap",
+            "score": 3,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "For a NORMAL tier, the chain links only the VolunteerVerificationHandler and the AreaCoordinatorVerificationHandler.",
+                "status": "covered"
+              },
+              {
+                "text": "Because the if-statement on line 10 evaluates to false, the area coordinator's next reference remains null.",
+                "status": "missing"
+              },
+              {
+                "text": "When the area coordinator approves, the handle method returns a VerificationResult with the outcome set to VERIFIED because next is null.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "gap",
+            "score": 3,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "For a NORMAL tier, the chain links only the VolunteerVerificationHandler and the AreaCoordinatorVerificationHandler.",
+                "status": "covered"
+              },
+              {
+                "text": "Because the if-statement on line 10 evaluates to false, the area coordinator's next reference remains null.",
+                "status": "missing"
+              },
+              {
+                "text": "When the area coordinator approves, the handle method returns a VerificationResult with the outcome set to VERIFIED because next is null.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "chain-3",
+        "caseId": "relief-chain-normal",
+        "label": "gap",
+        "runs": [
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "For a NORMAL tier, the chain links only the VolunteerVerificationHandler and the AreaCoordinatorVerificationHandler.",
+                "status": "missing"
+              },
+              {
+                "text": "Because the if-statement on line 10 evaluates to false, the area coordinator's next reference remains null.",
+                "status": "missing"
+              },
+              {
+                "text": "When the area coordinator approves, the handle method returns a VerificationResult with the outcome set to VERIFIED because next is null.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": [
+              "All four handlers: volunteer, area coordinator, relief coordinator and administrator."
+            ]
+          },
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "For a NORMAL tier, the chain links only the VolunteerVerificationHandler and the AreaCoordinatorVerificationHandler.",
+                "status": "missing"
+              },
+              {
+                "text": "Because the if-statement on line 10 evaluates to false, the area coordinator's next reference remains null.",
+                "status": "missing"
+              },
+              {
+                "text": "When the area coordinator approves, the handle method returns a VerificationResult with the outcome set to VERIFIED because next is null.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": [
+              "All four handlers: volunteer, area coordinator, relief coordinator and administrator."
+            ]
+          },
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "For a NORMAL tier, the chain links only the VolunteerVerificationHandler and the AreaCoordinatorVerificationHandler.",
+                "status": "missing"
+              },
+              {
+                "text": "Because the if-statement on line 10 evaluates to false, the area coordinator's next reference remains null.",
+                "status": "missing"
+              },
+              {
+                "text": "When the area coordinator approves, the handle method returns a VerificationResult with the outcome set to VERIFIED because next is null.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": [
+              "All four handlers: volunteer, area coordinator, relief coordinator and administrator."
+            ]
+          }
+        ]
+      },
+      {
+        "answerId": "chain-4",
+        "caseId": "relief-chain-normal",
+        "label": "solid",
+        "runs": [
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "For a NORMAL tier, the chain links only the VolunteerVerificationHandler and the AreaCoordinatorVerificationHandler.",
+                "status": "covered"
+              },
+              {
+                "text": "Because the if-statement on line 10 evaluates to false, the area coordinator's next reference remains null.",
+                "status": "covered"
+              },
+              {
+                "text": "When the area coordinator approves, the handle method returns a VerificationResult with the outcome set to VERIFIED because next is null.",
+                "status": "covered"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "For a NORMAL tier, the chain links only the VolunteerVerificationHandler and the AreaCoordinatorVerificationHandler.",
+                "status": "covered"
+              },
+              {
+                "text": "Because the if-statement on line 10 evaluates to false, the area coordinator's next reference remains null.",
+                "status": "covered"
+              },
+              {
+                "text": "When the area coordinator approves, the handle method returns a VerificationResult with the outcome set to VERIFIED because next is null.",
+                "status": "covered"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "For a NORMAL tier, the chain links only the VolunteerVerificationHandler and the AreaCoordinatorVerificationHandler.",
+                "status": "covered"
+              },
+              {
+                "text": "Because the if-statement on line 10 evaluates to false, the area coordinator's next reference remains null.",
+                "status": "covered"
+              },
+              {
+                "text": "When the area coordinator approves, the handle method returns a VerificationResult with the outcome set to VERIFIED because next is null.",
+                "status": "covered"
+              }
+            ],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "chain-5",
+        "caseId": "relief-chain-normal",
+        "label": "gap",
+        "runs": [
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "For a NORMAL tier, the chain links only the VolunteerVerificationHandler and the AreaCoordinatorVerificationHandler.",
+                "status": "partial"
+              },
+              {
+                "text": "Because the if-statement on line 10 evaluates to false, the area coordinator's next reference remains null.",
+                "status": "missing"
+              },
+              {
+                "text": "When the area coordinator approves, the handle method returns a VerificationResult with the outcome set to VERIFIED because next is null.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": [
+              "Volunteer, area coordinator and relief coordinator",
+              "moves to the relief coordinator as STEP_APPROVED"
+            ]
+          },
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "For a NORMAL tier, the chain links only the VolunteerVerificationHandler and the AreaCoordinatorVerificationHandler.",
+                "status": "missing"
+              },
+              {
+                "text": "Because the if-statement on line 10 evaluates to false, the area coordinator's next reference remains null.",
+                "status": "missing"
+              },
+              {
+                "text": "When the area coordinator approves, the handle method returns a VerificationResult with the outcome set to VERIFIED because next is null.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": [
+              "Volunteer, area coordinator and relief coordinator",
+              "moves to the relief coordinator as STEP_APPROVED"
+            ]
+          },
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "For a NORMAL tier, the chain links only the VolunteerVerificationHandler and the AreaCoordinatorVerificationHandler.",
+                "status": "partial"
+              },
+              {
+                "text": "Because the if-statement on line 10 evaluates to false, the area coordinator's next reference remains null.",
+                "status": "missing"
+              },
+              {
+                "text": "When the area coordinator approves, the handle method returns a VerificationResult with the outcome set to VERIFIED because next is null.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": [
+              "Volunteer, area coordinator and relief coordinator",
+              "moves to the relief coordinator as STEP_APPROVED"
+            ]
+          }
+        ]
+      },
+      {
+        "answerId": "chain-6",
+        "caseId": "relief-chain-normal",
+        "label": "gap",
+        "runs": [
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "For a NORMAL tier, the chain links only the VolunteerVerificationHandler and the AreaCoordinatorVerificationHandler.",
+                "status": "missing"
+              },
+              {
+                "text": "Because the if-statement on line 10 evaluates to false, the area coordinator's next reference remains null.",
+                "status": "missing"
+              },
+              {
+                "text": "When the area coordinator approves, the handle method returns a VerificationResult with the outcome set to VERIFIED because next is null.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "For a NORMAL tier, the chain links only the VolunteerVerificationHandler and the AreaCoordinatorVerificationHandler.",
+                "status": "missing"
+              },
+              {
+                "text": "Because the if-statement on line 10 evaluates to false, the area coordinator's next reference remains null.",
+                "status": "missing"
+              },
+              {
+                "text": "When the area coordinator approves, the handle method returns a VerificationResult with the outcome set to VERIFIED because next is null.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "gap",
+            "score": 0,
+            "grading": "checklist",
+            "points": [
+              {
+                "text": "For a NORMAL tier, the chain links only the VolunteerVerificationHandler and the AreaCoordinatorVerificationHandler.",
+                "status": "missing"
+              },
+              {
+                "text": "Because the if-statement on line 10 evaluates to false, the area coordinator's next reference remains null.",
+                "status": "missing"
+              },
+              {
+                "text": "When the area coordinator approves, the handle method returns a VerificationResult with the outcome set to VERIFIED because next is null.",
+                "status": "missing"
+              }
+            ],
+            "wrongClaims": []
+          }
+        ]
+      }
+    ],
+    "holistic": [
+      {
+        "answerId": "queue-1",
+        "caseId": "queue-dequeue",
+        "label": "solid",
+        "runs": [
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "queue-2",
+        "caseId": "queue-dequeue",
+        "label": "partial",
+        "runs": [
+          {
+            "verdict": "partial",
+            "score": 6,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "partial",
+            "score": 6,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "partial",
+            "score": 6,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "queue-3",
+        "caseId": "queue-dequeue",
+        "label": "solid",
+        "runs": [
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "queue-4",
+        "caseId": "queue-dequeue",
+        "label": "gap",
+        "runs": [
+          {
+            "verdict": "gap",
+            "score": 2,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "gap",
+            "score": 3,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "gap",
+            "score": 3,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "queue-5",
+        "caseId": "queue-dequeue",
+        "label": "gap",
+        "runs": [
+          {
+            "verdict": "gap",
+            "score": 2,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "gap",
+            "score": 3,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "gap",
+            "score": 3,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "queue-6",
+        "caseId": "queue-dequeue",
+        "label": "partial",
+        "runs": [
+          {
+            "verdict": "partial",
+            "score": 6,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "partial",
+            "score": 6,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "partial",
+            "score": 6,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "sms-1",
+        "caseId": "sms-enroll-race",
+        "label": "solid",
+        "runs": [
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "sms-2",
+        "caseId": "sms-enroll-race",
+        "label": "partial",
+        "runs": [
+          {
+            "verdict": "partial",
+            "score": 6,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "partial",
+            "score": 6,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "partial",
+            "score": 6,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "sms-3",
+        "caseId": "sms-enroll-race",
+        "label": "gap",
+        "runs": [
+          {
+            "verdict": "gap",
+            "score": 3,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "gap",
+            "score": 3,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "gap",
+            "score": 3,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "sms-4",
+        "caseId": "sms-enroll-race",
+        "label": "solid",
+        "runs": [
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "sms-5",
+        "caseId": "sms-enroll-race",
+        "label": "gap",
+        "runs": [
+          {
+            "verdict": "partial",
+            "score": 5,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "partial",
+            "score": 5,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "partial",
+            "score": 5,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "sms-6",
+        "caseId": "sms-enroll-race",
+        "label": "gap",
+        "runs": [
+          {
+            "verdict": "gap",
+            "score": 3,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "gap",
+            "score": 2,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "gap",
+            "score": 2,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "order-1",
+        "caseId": "sms-check-order",
+        "label": "solid",
+        "runs": [
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "order-2",
+        "caseId": "sms-check-order",
+        "label": "gap",
+        "runs": [
+          {
+            "verdict": "partial",
+            "score": 5,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "partial",
+            "score": 5,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "partial",
+            "score": 5,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "order-3",
+        "caseId": "sms-check-order",
+        "label": "partial",
+        "runs": [
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "order-4",
+        "caseId": "sms-check-order",
+        "label": "gap",
+        "runs": [
+          {
+            "verdict": "gap",
+            "score": 2,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "gap",
+            "score": 2,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "gap",
+            "score": 2,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "order-5",
+        "caseId": "sms-check-order",
+        "label": "gap",
+        "runs": [
+          {
+            "verdict": "partial",
+            "score": 5,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "partial",
+            "score": 5,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "partial",
+            "score": 5,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "order-6",
+        "caseId": "sms-check-order",
+        "label": "solid",
+        "runs": [
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "relief-1",
+        "caseId": "relief-handle-skip",
+        "label": "solid",
+        "runs": [
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "relief-2",
+        "caseId": "relief-handle-skip",
+        "label": "partial",
+        "runs": [
+          {
+            "verdict": "partial",
+            "score": 5,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "partial",
+            "score": 5,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "partial",
+            "score": 5,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "relief-3",
+        "caseId": "relief-handle-skip",
+        "label": "gap",
+        "runs": [
+          {
+            "verdict": "gap",
+            "score": 2,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "gap",
+            "score": 2,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "gap",
+            "score": 2,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "relief-4",
+        "caseId": "relief-handle-skip",
+        "label": "solid",
+        "runs": [
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "relief-5",
+        "caseId": "relief-handle-skip",
+        "label": "gap",
+        "runs": [
+          {
+            "verdict": "partial",
+            "score": 5,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "partial",
+            "score": 5,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "partial",
+            "score": 5,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "relief-6",
+        "caseId": "relief-handle-skip",
+        "label": "gap",
+        "runs": [
+          {
+            "verdict": "gap",
+            "score": 2,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "gap",
+            "score": 3,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "gap",
+            "score": 2,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "chain-1",
+        "caseId": "relief-chain-normal",
+        "label": "solid",
+        "runs": [
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "chain-2",
+        "caseId": "relief-chain-normal",
+        "label": "partial",
+        "runs": [
+          {
+            "verdict": "partial",
+            "score": 5,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "partial",
+            "score": 5,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "partial",
+            "score": 6,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "chain-3",
+        "caseId": "relief-chain-normal",
+        "label": "gap",
+        "runs": [
+          {
+            "verdict": "gap",
+            "score": 2,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "gap",
+            "score": 2,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "gap",
+            "score": 2,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "chain-4",
+        "caseId": "relief-chain-normal",
+        "label": "solid",
+        "runs": [
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "solid",
+            "score": 10,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "chain-5",
+        "caseId": "relief-chain-normal",
+        "label": "gap",
+        "runs": [
+          {
+            "verdict": "partial",
+            "score": 5,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "partial",
+            "score": 5,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "partial",
+            "score": 5,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          }
+        ]
+      },
+      {
+        "answerId": "chain-6",
+        "caseId": "relief-chain-normal",
+        "label": "gap",
+        "runs": [
+          {
+            "verdict": "gap",
+            "score": 3,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "gap",
+            "score": 3,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          },
+          {
+            "verdict": "gap",
+            "score": 3,
+            "grading": "holistic",
+            "points": [],
+            "wrongClaims": []
+          }
+        ]
+      }
+    ]
+  },
+  "grounding": [
+    {
+      "bundle": "sample/token_queue.c+sample/token_queue.h",
+      "id": "q1",
+      "file": "token_queue.c",
+      "startLine": 25,
+      "endLine": 37,
+      "text": "In lines 25-37, why do you need to check if `node->next == NULL` after the loop finishes to update `q->tail`?",
+      "status": "unverified",
+      "attempts": 2,
+      "problems": [
+        "the highlight (25-37) was longer than 12 lines",
+        "the question mentions line 37 but highlights 25-36",
+        "the highlight (25-37) was longer than 12 lines",
+        "the question mentions line 37 but highlights 25-36"
+      ]
+    },
+    {
+      "bundle": "sample/token_queue.c+sample/token_queue.h",
+      "id": "q2",
+      "file": "token_queue.c",
+      "startLine": 53,
+      "endLine": 56,
+      "text": "On lines 53-56, why is it necessary to check if `q->head` is `NULL` after updating it, and what would happen if you omitted this check when dequeuing the last remaining element?",
+      "status": "grounded",
+      "attempts": 1,
+      "problems": []
+    },
+    {
+      "bundle": "sample/token_queue.c+sample/token_queue.h",
+      "id": "q3",
+      "file": "token_queue.c",
+      "startLine": 68,
+      "endLine": 76,
+      "text": "In free_queue, why do you call init_queue(q) at the end of the function, and what would happen to the queue's state if you omitted that call?",
+      "status": "grounded",
+      "attempts": 1,
+      "problems": []
+    },
+    {
+      "bundle": "sample/token_queue.c+sample/token_queue.h",
+      "id": "q4",
+      "file": "token_queue.c",
+      "startLine": 63,
+      "endLine": 66,
+      "text": "On line 65, you perform integer division of `total_seconds` by 60. What happens to the fractional part of the result, and how does this affect the accuracy of the wait time estimate?",
+      "status": "grounded",
+      "attempts": 1,
+      "problems": []
+    },
+    {
+      "bundle": "sms/course.py+sms/course_service.py",
+      "id": "q1",
+      "file": "course_service.py",
+      "startLine": 49,
+      "endLine": 50,
+      "text": "On line 49, why do you check `enrollment_repo.count_for_course(code)` before allowing a deletion, and what would happen if you removed this check?",
+      "status": "grounded",
+      "attempts": 1,
+      "problems": []
+    },
+    {
+      "bundle": "sms/course.py+sms/course_service.py",
+      "id": "q2",
+      "file": "course.py",
+      "startLine": 38,
+      "endLine": 44,
+      "text": "On line 38, why do you check if `code` is `None` before validating the `code` field, and what happens if a user tries to change the `code` during a `PUT` request?",
+      "status": "grounded",
+      "attempts": 1,
+      "problems": []
+    },
+    {
+      "bundle": "sms/course.py+sms/course_service.py",
+      "id": "q3",
+      "file": "course_service.py",
+      "startLine": 69,
+      "endLine": 71,
+      "text": "On line 71, you call `course.check_can_enroll` with `enrolled_count` and `already_enrolled`. Why is it necessary to pass these values into the `Course` object instead of having the `Course` object query the `enrollment_repo` directly?",
+      "status": "grounded",
+      "attempts": 1,
+      "problems": []
+    },
+    {
+      "bundle": "sms/course.py+sms/course_service.py",
+      "id": "q4",
+      "file": "course_service.py",
+      "startLine": 38,
+      "endLine": 41,
+      "text": "On line 39, you call `self.get_course(code)` before calling `parse_course(data, code)`. Why is it important to perform the existence check before validating the request body?",
+      "status": "grounded",
+      "attempts": 1,
+      "problems": []
+    },
+    {
+      "bundle": "reliefsync/VerificationChainBuilder.java+reliefsync/VerificationHandler.java",
+      "id": "q1",
+      "file": "VerificationChainBuilder.java",
+      "startLine": 6,
+      "endLine": 15,
+      "text": "In the `build` method, why do you return `volunteer` instead of the last handler added to the chain?",
+      "status": "grounded",
+      "attempts": 1,
+      "problems": []
+    },
+    {
+      "bundle": "reliefsync/VerificationChainBuilder.java+reliefsync/VerificationHandler.java",
+      "id": "q2",
+      "file": "VerificationHandler.java",
+      "startLine": 28,
+      "endLine": 32,
+      "text": "On lines 28-32, why do you use recursion to find the next required level instead of just returning the next handler's level directly?",
+      "status": "grounded",
+      "attempts": 1,
+      "problems": []
+    },
+    {
+      "bundle": "reliefsync/VerificationChainBuilder.java+reliefsync/VerificationHandler.java",
+      "id": "q3",
+      "file": "VerificationHandler.java",
+      "startLine": 40,
+      "endLine": 41,
+      "text": "On lines 40-41, why do you compare the session role to the handler role instead of checking if the user has permission to perform the specific verification action?",
+      "status": "grounded",
+      "attempts": 1,
+      "problems": []
+    },
+    {
+      "bundle": "reliefsync/VerificationChainBuilder.java+reliefsync/VerificationHandler.java",
+      "id": "q4",
+      "file": "VerificationHandler.java",
+      "startLine": 44,
+      "endLine": 46,
+      "text": "On lines 44-46, why do you specifically check if the reason is blank when a decision is returned or rejected, rather than just checking if it is null?",
+      "status": "grounded",
+      "attempts": 1,
+      "problems": []
+    }
+  ],
+  "failures": [],
+  "stats": {
+    "calls": 216,
+    "retries": 18,
+    "errors": 0,
+    "latencies": [
+      1689,
+      1921,
+      1757,
+      5912,
+      2014,
+      1853,
+      1373,
+      4566,
+      1711,
+      1731,
+      1203,
+      1357,
+      5010,
+      23908,
+      18694,
+      20773,
+      30689,
+      1473,
+      30849,
+      35624,
+      2000,
+      2041,
+      1530,
+      10143,
+      7785,
+      1896,
+      2059,
+      4041,
+      4678,
+      7060,
+      2676,
+      1960,
+      1980,
+      30990,
+      3927,
+      1596,
+      1618,
+      7444,
+      4331,
+      1472,
+      1548,
+      1211,
+      1368,
+      1294,
+      1640,
+      1653,
+      1617,
+      1920,
+      8239,
+      4431,
+      1855,
+      2938,
+      1907,
+      1831,
+      4166,
+      1697,
+      1238,
+      1633,
+      1509,
+      1444,
+      41771,
+      1443,
+      2674,
+      1953,
+      1803,
+      2192,
+      7749,
+      9205,
+      1811,
+      11551,
+      6029,
+      2105,
+      5376,
+      1666,
+      1463,
+      2215,
+      10160,
+      1411,
+      1661,
+      2610,
+      1317,
+      2003,
+      3240,
+      2460,
+      15952,
+      3482,
+      1572,
+      1449,
+      1894,
+      1641,
+      1830,
+      1613,
+      1519,
+      1996,
+      12693,
+      4207,
+      17743,
+      1544,
+      1972,
+      2000,
+      4284,
+      15656,
+      1978,
+      1782,
+      1737,
+      2545,
+      1813,
+      10600,
+      1314,
+      1318,
+      1672,
+      1445,
+      1831,
+      1597,
+      2840,
+      1547,
+      1376,
+      22013,
+      1788,
+      1401,
+      1577,
+      1861,
+      9057,
+      1519,
+      1639,
+      5468,
+      24679,
+      3626,
+      8347,
+      1084,
+      1836,
+      2866,
+      1774,
+      1098,
+      1267,
+      1604,
+      1458,
+      2489,
+      1582,
+      961,
+      1292,
+      23215,
+      2557,
+      5635,
+      5220,
+      1971,
+      1860,
+      1529,
+      24421,
+      4892,
+      4829,
+      1534,
+      1295,
+      42499,
+      1421,
+      5499,
+      2398,
+      2772,
+      1312,
+      1182,
+      1250,
+      1722,
+      1776,
+      4162,
+      2236,
+      1436,
+      11922,
+      1261,
+      1743,
+      1350,
+      1148,
+      904,
+      1222,
+      2281,
+      1634,
+      1816,
+      3692,
+      1390,
+      24652,
+      1697,
+      1901,
+      1494,
+      2621,
+      1392,
+      1232,
+      2845,
+      3607,
+      2674,
+      1569,
+      1352,
+      3149,
+      2525,
+      1848,
+      1576,
+      5653,
+      1922,
+      1506,
+      1720
+    ]
+  }
+}

@@ -55,11 +55,12 @@ ReliefSync repo scored 43/100, and re-testing a missed region took it from GAP t
 What CodeViva adds for the student:
 
 - **Practice on your own code, any time, free** — paste a GitHub link; no instructor setup.
-- **Questions on lines you can see**, checked by the line checker: ⟨fill: "X of Y questions were
-  on the right lines first time; the checker repaired Z and re-asked W" — table 3 of SUMMARY.md⟩.
-- **The same answer gets the same verdict**: with the answer key, the same answer kept its
-  verdict in ⟨fill⟩% of repeats, vs ⟨fill⟩% when the model picks the score directly (the
-  "quiz me" approach) — table 2.
+- **Questions on lines you can see**, checked by the line checker: in the evaluation, 11 of 12
+  AI-written questions were on the right lines first time; the 12th (a 13-line highlight, over the
+  12-line limit) stayed unverified after one retry and is shown marked "lines not verified".
+- **Wrong answers get no credit**: with the answer key, all 14 answers that are wrong or off-topic
+  scored 0; when the model picks the score directly (the "quiz me" approach), 5 of those 14 got
+  5/10 (evaluation table 5).
 - **A loop, not a quiz**: re-test exactly the lines you missed and see before → after.
 - **Your language**: answer in Bangla, Hindi, Arabic and 7 more — judged on meaning, not English.
 
@@ -94,9 +95,14 @@ Tests went from 29 to 65.
   mode, multilingual (Bangla included), fast enough for a conversation.
   It was not compared against a larger model for this submission.
 - **Design choice 1 — answer key first, server-side score.** The model never picks the score.
-  Evidence: ⟨fill: exact agreement with human labels — answer key X% vs holistic Y%; severe
-  disagreements A vs B; same verdict on repeats C% vs D%⟩.
-- **Design choice 2 — line checker.** Evidence: ⟨fill from table 3⟩. Example from testing: asked
+  Evidence (30 answers, 3 runs each, compared with AI-written reference labels): both graders
+  agree with the reference label on 80% of answers, with no severe misses (solid ↔ gap). They fail
+  differently: the answer key got every wrong and every solid answer right (24/24) but none of the
+  6 "partial" answers (4 marked gap, 2 solid); the old holistic grader got 5 of 6 partials right but
+  gave half marks to 5 of the 14 wrong answers. Both gave the same verdict on every repeat (score
+  spread 0.07 vs 0.17 out of 10), so on this set the answer key did not improve consistency.
+- **Design choice 2 — line checker.** Evidence: in the evaluation's 12 questions the model was
+  already right 11 times, so the checker's main job there was catching the 12th. Example from testing: asked
   "Why does `dequeue` reset `tail`?" while pointing at the wrong lines, the checker moved the
   highlight to lines 47–55 of `token_queue.c` — from `dequeue` to `q->tail = NULL`.
 
@@ -110,10 +116,25 @@ ran; no person checked these labels.** So "agreement" below means agreement betw
 CodeViva's Gemini grader and a second, independent AI reading of the same rubric, not
 agreement with a human examiner. `npm run eval` grades each answer 3 times with both graders.
 
-Results (`eval/results/SUMMARY.md`): ⟨fill: the key rows of tables 1–3⟩
+Results (`eval/results/SUMMARY.md`, Gemini 3.1 Flash-Lite, 216 calls, 0 failed):
 
-Rely on it for: ⟨fill from the per-answer table — e.g. complete answers and confidently wrong answers⟩.
-Don't rely on it for: ⟨fill — e.g. the answers it got wrong and why: short correct answers? Bangla?⟩.
+| | Answer key (CodeViva) | Holistic (old) |
+|---|---|---|
+| Exact agreement with reference labels | 80% | 80% |
+| Within one step | 100% | 100% |
+| Severe misses (solid ↔ gap) | 0 | 0 |
+| Wrong answers (14) scored as gap | 14 | 9 |
+| "Partial" answers (6) scored as partial | 0 | 5 |
+| Same verdict on all 3 runs | 100% | 100% |
+
+Line checker: 11 of 12 questions on the right lines first time, 1 unverified. Median call 1.9 s.
+
+Rely on it for: telling a solid, complete answer from a wrong one, in English, Bangla or
+Banglish. Every wrong or off-topic answer scored 0, and every complete answer scored 10.
+Don't rely on it for: the middle ground. A vague or half-right answer is usually marked *gap*
+(score 3 — the key points it skipped count as missing) and sometimes *solid* (relief-2, a
+one-line "it skips to the next handler", got 8–10). Treat a *gap* on an answer you thought was
+roughly right as "say more", not "wrong".
 Also: a question that names no identifier and no line number can't be verified by the line
 checker; CodeViva is practice, not proctoring — the score is feedback, not a grade.
 
@@ -137,7 +158,7 @@ where marked "live".
 | Main process [R1] | Load → 5 questions → report → re-test | Report with score, heatmap, answer keys; re-test shows before → after | Pass — live site, real Gemini: ReliefSync viva → report 43/100; re-test GAP → SOLID (15 → 100) |
 | Ordinary 1 [R2a] | Bundled C sample, English answers | Questions on highlighted lines; marked key points; report | Pass — live, real Gemini: a good, a vague and a wrong answer scored 10, 6 and 0 |
 | Ordinary 2 [R2b] | Python code from my SMS Flask project, answers in Bangla and Banglish | Non-English answers judged on meaning | Covered by the evaluation set (SMS questions, Bangla and Banglish answers; see the per-answer table); not run as a full live viva on the SMS repo |
-| Repeat [R2c] | Each evaluation answer graded 3× | Same verdict on repeats | ⟨fill: table 2⟩ |
+| Repeat [R2c] | Each evaluation answer graded 3× | Same verdict on repeats | Pass — 30 of 30 answers got the same verdict on all 3 runs (mean score spread 0.07/10) |
 | Demanding [R2d] | My ReliefSync repo by link: Java, many files, follow-ups, re-test | Questions grounded across files; re-test stays on the missed regions | Pass — live, real Gemini: full viva and re-test on the missed region (see R1) |
 | Failure 1 [R3a] | Link to a private or non-existent repo | "Not found or private" message; already loaded files and settings untouched | Pass — live site: clear not-found (404) and bad-link (400) messages |
 | Failure 2 [R3b] | AI call fails mid-viva (rate limit / network) | Error with Retry; answered questions kept; page refresh → Resume restores the viva | Pass — failure simulated with the test model in headless Chrome; Retry and Resume restored the viva |

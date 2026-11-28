@@ -98,6 +98,8 @@ codeviva/
 
 `eval/` holds 30 answers to 5 viva questions on real student code (C, Python and Java, from the bundled sample and two of the author's course projects), in English, Bangla and Banglish, each with a reference label (solid / partial / gap). **The reference labels were written by Claude, the AI assistant used to build the project, and were not checked by a person**, so the agreement numbers compare two AI readings, not AI against a human. `npm run eval` grades every answer several times with the **answer-key grader** and the **old holistic grader** (the model picks a 0–10 score), compares both with the reference labels, and counts how often the line checker had to repair or re-ask questions. Results: [`eval/results/SUMMARY.md`](eval/results/SUMMARY.md) · method: [`eval/README.md`](eval/README.md).
 
+**Results (Gemini 3.1 Flash-Lite, 216 calls):** both graders match the reference label on 80% of answers, with no solid ↔ gap misses. The answer-key grader scored all 14 wrong answers 0 (the holistic grader gave 5 of them half marks), but it marked none of the 6 half-right answers as *partial*. Every answer got the same verdict on all 3 runs. The line checker found 11 of 12 questions on the right lines first time.
+
 ## Tests
 
 ```bash

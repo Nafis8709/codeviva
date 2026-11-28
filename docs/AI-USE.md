@@ -39,12 +39,15 @@ for the numbers, including where the grader and the reference labels disagree.
    0–10 score gives different numbers for the same answer and can be talked into a high
    score by a fluent but wrong answer. Choice: the key is written before the answer is
    seen, the model only marks points, wrong claims cost 3 points, and the server does the
-   arithmetic. Evidence: answer-key vs holistic grading in the evaluation (agreement and
-   consistency tables).
+   arithmetic. Evidence (evaluation, AI-written reference labels): all 14 wrong answers scored 0
+   with the answer key, while the holistic grader gave 5 of them 5/10. The cost: the answer key
+   marked none of the 6 half-right answers as *partial*. Both graders were equally consistent
+   (same verdict on every repeat), so consistency is not an advantage on this set.
 2. *Line checker.* Problem: a question that highlights the wrong lines is worse than no
    question. Choice: verify every question against the code, repair or re-ask once.
-   Evidence: the grounding table in the evaluation (correct first time / repaired /
-   re-asked / unverified).
+   Evidence: in the evaluation, 11 of 12 questions were on the right lines first time; the 12th
+   stayed unverified after one retry (its highlight was over the 12-line limit) and is shown
+   marked "lines not verified".
 
 ## 2. AI used to build CodeViva during the event
 
