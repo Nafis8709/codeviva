@@ -285,7 +285,9 @@ h2 {
 
 #compare[hidden] { display: none; }
 .compare-summary { margin: 0 0 8px; }
-.plain-list.compare-list li { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding-left: 0; }
+.plain-list.compare-list { gap: 0; }
+.plain-list.compare-list li { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; padding: var(--space-2) 0 0; }
+.compare-list .stamp { margin-right: 0; }
 .plain-list.compare-list li::before { content: none; }
 .compare-list button { border: none; background: none; padding: 0; font: inherit; color: inherit; cursor: pointer; text-align: left; flex: 1; min-width: 10em; }
 .compare-list button:hover { text-decoration: underline; }
@@ -639,6 +641,9 @@ h2 {
   text-transform: uppercase;
   transform: rotate(-2deg);
   margin-right: 8px;
+  min-width: 6.5em;
+  text-align: center;
+  flex: 0 0 auto;
 }
 .stamp.solid { color: var(--green-ink); }
 .stamp.partial { color: var(--amber-ink); }
@@ -695,28 +700,34 @@ h2 {
 .report-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .copied { color: var(--green-ink); font-size: var(--text-sm); }
 
-.report-lists { padding: 24px 26px; }
-.report-lists h2 { margin-top: 22px; }
-.report-lists h2:first-child { margin-top: 0; }
+.report-lists { padding: var(--space-5) var(--space-5); }
+.report-lists h2 { margin-top: var(--space-5); }
+.report-lists h2:first-child,
+.report-lists #compare[hidden] + h2 { margin-top: 0; }
+#compare { padding-bottom: var(--space-4); border-bottom: 1px solid var(--rule); }
 
 .plain-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
 .plain-list li { padding-left: 18px; position: relative; }
 .plain-list li::before { content: '✓'; position: absolute; left: 0; color: var(--green-ink); font-weight: 700; }
 .plain-list li.empty::before { content: '–'; color: var(--ink-muted); }
 .plain-list li.empty { color: var(--ink-muted); }
-.gap-links li::before { content: '✗'; color: var(--red); }
+.gap-links li { display: flex; align-items: center; gap: var(--space-2); padding-left: 0; }
+.gap-links li::before { content: '✗'; color: var(--red); position: static; flex: 0 0 auto; }
+.gap-links li.empty::before { content: '–'; color: var(--ink-muted); }
 .gap-links button {
   border: none; background: none; padding: 0; cursor: pointer; font: inherit; color: var(--ink); text-align: left;
+  display: inline-flex; flex-wrap: wrap; align-items: baseline; column-gap: 6px;
 }
 .gap-links button:hover .ref { text-decoration: underline; }
-.gap-links .ref { font-family: var(--font-code); font-size: var(--text-sm); color: var(--red); margin-left: 6px; }
+.gap-links .ref { font-family: var(--font-code); font-size: var(--text-sm); color: var(--red-ink); }
 
 .revise-list { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 6px; }
 
 .qa { border-top: 1px solid var(--rule); padding: 10px 0; }
-.qa summary { cursor: pointer; display: flex; align-items: baseline; gap: 6px; }
+.qa summary { cursor: pointer; display: flex; align-items: center; gap: var(--space-2); }
+.qa summary .stamp { margin-right: 0; }
 .qa summary .stamp { font-size: var(--text-xs); }
-.qa-body { padding: 8px 0 0 4px; font-size: var(--text-base); }
+.qa-body { padding: var(--space-2) 0 0 calc(1em + var(--space-2)); font-size: var(--text-base); }
 .qa-body p { margin: 6px 0; }
 .qa-body .label { font-size: var(--text-xs); text-transform: uppercase; letter-spacing: var(--label-tracking); color: var(--ink-muted); display: block; }
 
@@ -732,7 +743,7 @@ h2 {
   .viva-grid .exam-panel { order: -1; }
   .code-panel { position: static; }
   .code-view { max-height: 46vh; min-height: 200px; }
-  .report-head { flex-direction: column; align-items: flex-start; gap: 12px; padding: 24px 18px; }
+  .report-head { gap: var(--space-5); padding: var(--space-5); }
   .code-panel { margin-top: var(--space-2); }
 }
 
@@ -775,4 +786,20 @@ h2 {
   .paste textarea { font-size: var(--text-base); }
   .topbar { padding: var(--space-3); }
   .status-pill { max-width: 52vw; }
+
+  /* Report: small score beside the headline, even buttons below. */
+  .report-head { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--space-3); row-gap: 0; align-items: center; padding: var(--space-4); }
+  .report-title { display: contents; }
+  .score-mark { grid-row: 1 / 3; width: 104px; height: 88px; padding-top: 25px; }
+  .score-number { font-size: 2rem; }
+  .score-out { font-size: var(--text-sm); }
+  .report-title .eyebrow { grid-column: 2; align-self: end; margin: 0; }
+  #report-headline { grid-column: 2; align-self: start; font-size: var(--text-xl); margin: 2px 0 0; }
+  .report-title .lede { grid-column: 1 / -1; margin: var(--space-3) 0 var(--space-4); }
+  .report-actions { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-2); }
+  .report-actions #retest-btn, .report-actions .copied { grid-column: 1 / -1; }
+  .report-actions #retest-btn { min-height: 48px; }
+  .report-actions .copied { text-align: center; }
+  .report-lists { padding: var(--space-4); }
+  .compare-list button { flex-basis: 100%; }
 }
