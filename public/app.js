@@ -173,9 +173,11 @@ function totalChars(files) {
   return total;
 }
 
-function showLoadNotice(message) {
+// kind: 'error' (default), 'warning' or 'success' — colour and icon follow it.
+function showLoadNotice(message, kind = 'error') {
   const notice = $('load-notice');
   notice.textContent = message || '';
+  notice.className = `notice is-${kind}`;
   notice.hidden = !message;
 }
 
@@ -218,7 +220,7 @@ async function addFilesFromInput(fileList) {
     addFile(file.webkitRelativePath || file.name, content);
   }
   if (skipped.length > 0) {
-    showLoadNotice(`Skipped: ${skipped.join(', ')}.`);
+    showLoadNotice(`Skipped: ${skipped.join(', ')}.`, 'warning');
   }
   renderFileList();
 }
@@ -398,7 +400,7 @@ async function addRepoFiles() {
     }
     renderFileList();
     $('repo-picker').hidden = true;
-    showLoadNotice(`${t('repoAdded')} ${data.files.length} ${t('filesWord')} ${t('from')} ${owner}/${name}.`);
+    showLoadNotice(`${t('repoAdded')} ${data.files.length} ${t('filesWord')} ${t('from')} ${owner}/${name}.`, 'success');
   } catch (error) {
     showLoadNotice(error.message); // the picker stays open with the same selection
   } finally {
@@ -412,8 +414,11 @@ function renderFileList() {
   list.replaceChildren();
   for (const file of state.files) {
     const item = el('li');
-    item.appendChild(el('span', 'file-name', file.name));
-    item.appendChild(el('span', 'file-lines', `${splitLines(file.content).length} lines`));
+    const name = el('span', 'file-name', file.name);
+    name.title = file.name;
+    item.appendChild(name);
+    const lineCount = splitLines(file.content).length;
+    item.appendChild(el('span', 'file-lines', `${lineCount} ${lineCount === 1 ? 'line' : 'lines'}`));
     const remove = el('button', null, '×');
     remove.type = 'button';
     remove.setAttribute('aria-label', `Remove ${file.name}`);
@@ -424,7 +429,11 @@ function renderFileList() {
     item.appendChild(remove);
     list.appendChild(item);
   }
-  $('start-btn').disabled = state.files.length === 0;
+  const count = state.files.length;
+  $('loaded').hidden = count === 0;
+  $('files-summary').textContent = `${count} ${count === 1 ? 'file' : t('filesWord')} ready · ${totalChars(state.files).toLocaleString('en-US')} / ${MAX_TOTAL_CHARS.toLocaleString('en-US')} ${t('characters')}`;
+  $('start-btn').disabled = count === 0;
+  $('start-hint').hidden = count > 0;
 }
 
 function readSettings() {

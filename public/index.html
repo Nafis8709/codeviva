@@ -48,16 +48,13 @@
 
         <div class="step">
           <h2><span class="step-no">1</span> Load the code you'll be examined on</h2>
-          <label class="dropzone" id="dropzone" for="file-input">
-            <input type="file" id="file-input" multiple>
-            <span class="dropzone-title">Drop code files here</span>
-            <span class="dropzone-sub">or <u>choose files</u> · .c .cpp .java .py .js .ts and more · up to 60,000 characters</span>
-          </label>
-
-          <form class="repo-row" id="repo-form" autocomplete="off">
-            <label for="repo-url" class="sr-only">Public GitHub repository link</label>
-            <input type="text" id="repo-url" placeholder="…or paste a public GitHub repo, e.g. https://github.com/you/project" spellcheck="false">
-            <button type="submit" class="btn btn-small" id="repo-btn">Load repo</button>
+          <form class="repo-form" id="repo-form" autocomplete="off">
+            <label for="repo-url" class="field-label">Public GitHub repository</label>
+            <div class="repo-row">
+              <input type="text" id="repo-url" placeholder="https://github.com/you/project" spellcheck="false" inputmode="url" aria-describedby="repo-help">
+              <button type="submit" class="btn" id="repo-btn">Load repo</button>
+            </div>
+            <p class="field-help" id="repo-help">A repo, branch or folder link. You choose the files next.</p>
           </form>
 
           <div class="repo-picker" id="repo-picker" hidden>
@@ -86,20 +83,34 @@
             </div>
           </div>
 
-          <div class="load-row">
-            <button type="button" class="btn btn-ghost" id="sample-btn">
-              Try the sample project <span class="muted">(C · bank token queue)</span>
+          <div class="or-divider" aria-hidden="true"><span>or</span></div>
+
+          <div class="load-options">
+            <label class="option-tile dropzone" id="dropzone" for="file-input">
+              <input type="file" id="file-input" multiple>
+              <span class="option-title"><span class="for-fine">Drop files here or choose</span><span class="for-coarse">Choose files</span></span>
+              <span class="option-sub">.c .cpp .java .py .js .ts and more · up to 60,000 characters</span>
+            </label>
+            <button type="button" class="option-tile" id="sample-btn">
+              <span class="option-title">Try the sample project</span>
+              <span class="option-sub">A small C bank token queue</span>
             </button>
+          </div>
+
+          <div class="load-row">
             <details class="paste">
-              <summary>Paste a snippet instead</summary>
+              <summary>Paste code instead</summary>
               <input type="text" id="paste-name" placeholder="File name, e.g. main.cpp" value="pasted-code.txt" aria-label="Name for pasted code">
               <textarea id="paste-box" rows="7" spellcheck="false" placeholder="Paste code here…" aria-label="Pasted code"></textarea>
               <button type="button" class="btn btn-small" id="paste-add">Add pasted code</button>
             </details>
           </div>
 
-          <ul class="file-list" id="file-list" aria-live="polite"></ul>
-          <p class="notice" id="load-notice" hidden></p>
+          <p class="notice" id="load-notice" role="status" hidden></p>
+          <div class="loaded" id="loaded" hidden>
+            <p class="loaded-summary" id="files-summary"></p>
+            <ul class="file-list" id="file-list" aria-live="polite"></ul>
+          </div>
         </div>
 
         <div class="step">
@@ -135,7 +146,8 @@
         </div>
 
         <div class="start-row">
-          <button type="button" class="btn btn-primary" id="start-btn" disabled>Start viva</button>
+          <button type="button" class="btn btn-primary btn-large" id="start-btn" disabled aria-describedby="start-hint">Start viva</button>
+          <p class="start-hint" id="start-hint">Load your code in step 1 to start.</p>
           <p class="privacy">Your code is sent only to the configured AI examiner. Nothing is stored on the server; your viva is saved in this browser so you can resume it.</p>
         </div>
       </div>
