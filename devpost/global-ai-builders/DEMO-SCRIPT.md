@@ -14,7 +14,7 @@ Rehearse once; keep answers short. Narrate in English; one answer in Bangla or B
 | 1:50–2:05 | Press **F5** mid-viva → **Resume** | "If the tab closes, nothing is lost." | Reliability, R3 |
 | 2:05–2:30 | Report | Score, heatmap — click a red gap to jump to its lines. "These are the lines I can't defend yet." | Heatmap |
 | 2:30–2:50 | **Re-test my gaps** → answer well → re-test report | "It re-asks only what I missed, from a different angle." Show **GAP → SOLID** and the score on those lines. | Before → after, D4b |
-| 2:50–3:00 | `eval/results/SUMMARY.md` (optional quick cut) | "On 30 labelled answers, the answer key agreed with me ⟨X⟩% of the time, versus ⟨Y⟩% when the model picks the score." | Evaluation |
+| 2:50–3:00 | `eval/results/SUMMARY.md` (optional quick cut) | "On 30 test answers, the answer-key grader matched the reference labels ⟨X⟩% of the time, versus ⟨Y⟩% when the model picks the score. Those labels were written by an AI, not by me." | Evaluation |
 
 Failure moments to capture separately as screenshots for the description (not needed in the video):
 

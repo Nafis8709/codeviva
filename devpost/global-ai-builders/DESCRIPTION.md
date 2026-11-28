@@ -1,8 +1,7 @@
 # CodeViva — Devpost description (Global AI Builder's Challenge 2026)
 
-> Draft for the Devpost "About the project" field. Rubric codes in brackets show which
-> checkpoint each part answers; remove them before pasting if you prefer. Items marked
-> **⟨fill …⟩** need real results from `npm run eval` or a real viva — do not submit them blank.
+> For the Devpost "About the project" field. Rubric codes in brackets show which
+> checkpoint each part answers; remove them before pasting if you prefer.
 
 ## Inspiration
 
@@ -32,18 +31,18 @@ and junior developers who will be asked "walk me through your project" in an int
 
 ## A realistic use [V1b]
 
-⟨Run this for real on your ReliefSync repo and replace the details below with what actually
-happened — the question asked, what you got ✓ and ✗, and the before → after.⟩
+A typical session: two days before a ReliefSync viva (a Java desktop app, partly written
+with an AI assistant), the student pastes `https://github.com/Nafis8709/reliefsync`.
+CodeViva preselects the source files that fit, asks a question such as *"For a NORMAL-tier
+request, which handlers does `build` link, and what does the chain report after the area
+coordinator approves?"* with those lines highlighted, and marks the answer against its key
+(✓ covered, ½ partly, ✗ missed). The report's heatmap shows the regions the student
+couldn't defend in red; **Re-test my gaps** asks new questions on exactly those lines and
+shows before → after.
 
-Two days before my ReliefSync viva (a Java desktop app, partly written with an AI
-assistant), I paste `https://github.com/Nafis8709/reliefsync`. CodeViva preselects the
-source files that fit, asks *"For a NORMAL-tier request, which handlers does `build` link,
-and what does the chain report after the area coordinator approves?"* with those lines
-highlighted, and marks my answer against the key: ✓ volunteer and area coordinator are
-linked, ✗ I didn't say that `next == null` makes the result VERIFIED. The report's heatmap
-shows the verification chain in red. I press **Re-test my gaps**, get a new question on the
-same lines, and the report shows GAP → SOLID. That is the preparation I needed: exactly the
-lines I couldn't explain, before the examiner found them.
+In a live test of this flow on the hosted copy with real Gemini, a full viva on the
+ReliefSync repo scored 43/100, and re-testing a missed region took it from GAP to SOLID
+(15 → 100 on those lines).
 
 ## How people manage today, and what CodeViva changes [V2a, V2b]
 
@@ -80,7 +79,7 @@ During the event (full list with commits: `docs/HACKATHON-CHANGES.md`):
 
 1. **Line checker** — verifies every AI question against the lines it highlights; repairs or re-asks.
 2. **Answer-key grading** — key points written before the answer; checklist marking; score computed on the server.
-3. **Evaluation set and runner** — 30 human-labelled answers on real code in C, Python, Java; English, Bangla, Banglish.
+3. **Evaluation set and runner** — 30 answers on real code in C, Python, Java; English, Bangla, Banglish; reference labels written by Claude (not checked by a person).
 4. **The viva survives a refresh** — saved in the browser, resumable, including a half-typed answer.
 5. **Load a public GitHub repo by link** — filtered, preselected within budget, with clear failure messages.
 6. **Re-test my gaps** — targeted re-test with before → after.
@@ -93,8 +92,7 @@ Tests went from 29 to 65.
   marks answers against the key, writes follow-ups, re-test questions and the report summary.
   Why: free tier for students, a context window far beyond the 60,000-character limit, JSON
   mode, multilingual (Bangla included), fast enough for a conversation.
-  Comparison with a larger model on the same 30 answers: ⟨fill from tables 1, 2, 4: agreement,
-  consistency, median call time for flash-lite vs flash⟩.
+  It was not compared against a larger model for this submission.
 - **Design choice 1 — answer key first, server-side score.** The model never picks the score.
   Evidence: ⟨fill: exact agreement with human labels — answer key X% vs holistic Y%; severe
   disagreements A vs B; same verdict on repeats C% vs D%⟩.
@@ -106,8 +104,11 @@ Tests went from 29 to 65.
 
 Method: 5 viva questions on real student code (the bundled C sample; my SMS Flask project;
 my ReliefSync Java project), 6 answers each ranging from complete to confidently wrong, in
-English, Bangla and Banglish. I labelled every answer solid / partial / gap before running
-the evaluation. `npm run eval` grades each answer 3 times with both graders.
+English, Bangla and Banglish. Each answer has a reference label (solid / partial / gap)
+**written by Claude, the AI assistant that helped build the project, before the evaluation
+ran; no person checked these labels.** So "agreement" below means agreement between
+CodeViva's Gemini grader and a second, independent AI reading of the same rubric, not
+agreement with a human examiner. `npm run eval` grades each answer 3 times with both graders.
 
 Results (`eval/results/SUMMARY.md`): ⟨fill: the key rows of tables 1–3⟩
 
@@ -118,23 +119,28 @@ checker; CodeViva is practice, not proctoring — the score is feedback, not a g
 
 ## How AI was used to build it [A4a, A4b]
 
-Claude (Anthropic) wrote most of the event code after I approved a prioritised plan; I chose
-the scope, supplied my own projects for the evaluation, and labelled every evaluation answer.
-Automated checks found and fixed six defects in the AI-written code (table in `docs/AI-USE.md`).
-My own review: ⟨fill from the human-review table in docs/AI-USE.md — what you checked, what you
-found, and whether you kept, changed or rejected it⟩.
+Claude (Anthropic) wrote most of the event code, the evaluation answers and the evaluation's
+reference labels. My part: I chose the project and the scope, approved a prioritised plan
+before any code was written, supplied my own projects (SMS, ReliefSync) for the evaluation,
+asked for the deployment and a live test with real Gemini, and approved each redesigned
+screen one at a time. Automated checks found and fixed six defects in the AI-written code
+(table in `docs/AI-USE.md`). I did not carry out a separate written review of one specific
+AI-written file, and I did not label the evaluation myself.
 
 ## Testing the main task [R1, R2a–d, R3a–b]
 
+The checks below were run by Claude during development, on the hosted copy with real Gemini
+where marked "live".
+
 | Check | Example | Expected | Result |
 |---|---|---|---|
-| Main process [R1] | Load → 5 questions → report → re-test | Report with score, heatmap, answer keys; re-test shows before → after | ⟨fill⟩ |
-| Ordinary 1 [R2a] | Bundled C sample, English answers | Questions on highlighted lines; marked key points; report | ⟨fill⟩ |
-| Ordinary 2 [R2b] | My SMS Flask repo by link, answers in Banglish | Same, Python code, non-English answers judged on meaning | ⟨fill⟩ |
+| Main process [R1] | Load → 5 questions → report → re-test | Report with score, heatmap, answer keys; re-test shows before → after | Pass — live site, real Gemini: ReliefSync viva → report 43/100; re-test GAP → SOLID (15 → 100) |
+| Ordinary 1 [R2a] | Bundled C sample, English answers | Questions on highlighted lines; marked key points; report | Pass — live, real Gemini: a good, a vague and a wrong answer scored 10, 6 and 0 |
+| Ordinary 2 [R2b] | Python code from my SMS Flask project, answers in Bangla and Banglish | Non-English answers judged on meaning | Covered by the evaluation set (SMS questions, Bangla and Banglish answers; see the per-answer table); not run as a full live viva on the SMS repo |
 | Repeat [R2c] | Each evaluation answer graded 3× | Same verdict on repeats | ⟨fill: table 2⟩ |
-| Demanding [R2d] | My ReliefSync repo by link: Java, 12+ files near the 60k budget, strict examiner, follow-ups, re-test | Questions grounded across files; re-test stays on the missed regions | ⟨fill⟩ |
-| Failure 1 [R3a] | Link to a private or non-existent repo | "Not found or private" message; already loaded files and settings untouched | ⟨fill⟩ |
-| Failure 2 [R3b] | AI call fails mid-viva (rate limit / network) | Error with Retry; answered questions kept; page refresh → Resume restores the viva | ⟨fill⟩ |
+| Demanding [R2d] | My ReliefSync repo by link: Java, many files, follow-ups, re-test | Questions grounded across files; re-test stays on the missed regions | Pass — live, real Gemini: full viva and re-test on the missed region (see R1) |
+| Failure 1 [R3a] | Link to a private or non-existent repo | "Not found or private" message; already loaded files and settings untouched | Pass — live site: clear not-found (404) and bad-link (400) messages |
+| Failure 2 [R3b] | AI call fails mid-viva (rate limit / network) | Error with Retry; answered questions kept; page refresh → Resume restores the viva | Pass — failure simulated with the test model in headless Chrome; Retry and Resume restored the viva |
 
 ## Design [D1–D4b]
 

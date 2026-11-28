@@ -20,8 +20,9 @@ Gemini Flash-Lite is on Google's free tier, has a context window far larger than
 examiner languages. A viva is a conversation, so response time matters more than peak
 reasoning ability.
 
-**Evidence for that choice (A1b).** `npm run eval -- --models gemini-3.1-flash-lite,gemini-3-flash-preview`
-compares the default with a larger model on the same 30 labelled answers: agreement with
+**Evidence for that choice (A1b).** Not measured for this submission: only the default model was
+evaluated. `npm run eval -- --models gemini-3.1-flash-lite,gemini-3-flash-preview`
+would compare the default with a larger model on the same 30 labelled answers: agreement with
 the reference labels, consistency over repeats, grounding, and median call time.
 → Results: [`eval/results/SUMMARY.md`](../eval/results/SUMMARY.md) (tables 1–4).
 
