@@ -88,7 +88,7 @@ codeviva/
 │   ├── llm/                     # Gemini + OpenAI-compatible clients, tolerant JSON parsing
 │   └── examiners/               # AI examiner (validated) and demo examiner (scripted)
 ├── public/                      # index.html, styles.css, app.js, samples/
-├── eval/                        # evaluation set, human labels, results
+├── eval/                        # evaluation set, reference labels, results
 ├── scripts/                     # npm run label / npm run eval
 ├── test/                        # node:test suites
 └── docs/                        # what changed during the event, AI use, screenshots
@@ -96,7 +96,7 @@ codeviva/
 
 ## Evaluation
 
-`eval/` holds 30 answers to 5 viva questions on real student code (C, Python and Java, from the bundled sample and two of the author's course projects), in English, Bangla and Banglish, each labelled by a human. `npm run eval` grades every answer several times with the **answer-key grader** and the **old holistic grader** (the model picks a 0–10 score), compares both with the human labels, and counts how often the line checker had to repair or re-ask questions. Results: [`eval/results/SUMMARY.md`](eval/results/SUMMARY.md) · method: [`eval/README.md`](eval/README.md).
+`eval/` holds 30 answers to 5 viva questions on real student code (C, Python and Java, from the bundled sample and two of the author's course projects), in English, Bangla and Banglish, each with a reference label (solid / partial / gap). **The reference labels were written by Claude, the AI assistant used to build the project, and were not checked by a person**, so the agreement numbers compare two AI readings, not AI against a human. `npm run eval` grades every answer several times with the **answer-key grader** and the **old holistic grader** (the model picks a 0–10 score), compares both with the reference labels, and counts how often the line checker had to repair or re-ask questions. Results: [`eval/results/SUMMARY.md`](eval/results/SUMMARY.md) · method: [`eval/README.md`](eval/README.md).
 
 ## Tests
 
@@ -109,7 +109,7 @@ npm test
 ## Limitations
 
 - The line checker can only verify questions that name an identifier in `backticks` or mention a line number; a question with neither is accepted on the model's word (shown as *✓ lines checked* only when nothing contradicts it).
-- Grading quality depends on the model and on the answer key it writes; see the evaluation for where it agrees and disagrees with a human.
+- Grading quality depends on the model and on the answer key it writes; see the evaluation for where it agrees and disagrees with the reference labels. It has not been checked against a human examiner's verdicts.
 - Up to 60,000 characters and 20 files per viva — pick the files your viva covers. GitHub loading works for public repositories only.
 - Voice answers use the browser's speech recognition (best in Chrome/Edge); the mic button is hidden where unsupported. Recognition quality for some languages varies by browser.
 - Demo mode (no key) is a script, not AI, is English only, and is labelled everywhere it appears.

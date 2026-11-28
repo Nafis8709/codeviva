@@ -18,13 +18,18 @@ keep questions on the right code? This folder answers that with real model calls
 Answers range from complete to shallow, vague, confidently wrong and off-target,
 and include Bangla and Banglish answers (CodeViva grades meaning, not English).
 
-`labels.json` — the human verdict (solid / partial / gap) for each answer, made with
-`npm run label` **before** running the evaluation and without seeing the AI's output.
+`labels.json` — a reference verdict (solid / partial / gap) for each answer.
+**These labels were written by Claude** (the AI assistant used to build this project),
+by reading each answer against the code, before the evaluation was run. They were
+not checked by a person. So the agreement numbers measure how closely CodeViva's
+Gemini grader matches a second, independent AI's reading of the same rubric, not a
+human examiner. Anyone can replace them with their own verdicts using
+`npm run label -- --all` and re-run the evaluation.
 
 ## Running it
 
 ```bash
-npm run label                    # ~20 minutes: label all 30 answers
+npm run label -- --all          # optional: replace the reference labels with your own (~20 minutes)
 npm run eval                     # default model, answer-key vs holistic grading, 3 repeats each
 npm run eval -- --models gemini-3.1-flash-lite,gemini-3-flash-preview --repeats 2
 ```

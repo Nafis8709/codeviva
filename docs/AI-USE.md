@@ -22,12 +22,15 @@ reasoning ability.
 
 **Evidence for that choice (A1b).** `npm run eval -- --models gemini-3.1-flash-lite,gemini-3-flash-preview`
 compares the default with a larger model on the same 30 labelled answers: agreement with
-the human labels, consistency over repeats, grounding, and median call time.
+the reference labels, consistency over repeats, grounding, and median call time.
 → Results: [`eval/results/SUMMARY.md`](../eval/results/SUMMARY.md) (tables 1–4).
 
-**How the product's AI is checked (A3).** Against 30 human-labelled answers on real
-student code; see [`eval/README.md`](../eval/README.md) for the method and the results file
-for the numbers, including where the AI disagrees with the human.
+**How the product's AI is checked (A3).** Against 30 answers on real student code with
+reference labels. The labels were written by Claude, not by a person (see below), so the
+evaluation shows agreement between two independent AI readings of the same rubric plus
+consistency over repeats and grounding. It does not show agreement with a human
+examiner. See [`eval/README.md`](../eval/README.md) for the method and the results file
+for the numbers, including where the grader and the reference labels disagree.
 
 **Design choices that control the AI (A2).**
 
@@ -51,8 +54,10 @@ plan, Claude wrote most of the code for the event changes listed in
 [`HACKATHON-CHANGES.md`](HACKATHON-CHANGES.md): the line checker, answer-key grading, the
 evaluation set and runner, session saving, GitHub loading and re-tests, plus their tests
 and documentation. The evaluation questions use code from Nafis's own projects (SMS,
-ReliefSync); the answers were drafted by Claude to cover a range of quality and languages,
-and **every label is Nafis's own** (`npm run label`, done before running the evaluation).
+ReliefSync); the answers were drafted by Claude to cover a range of quality and languages.
+**The reference labels were also written by Claude** (before the evaluation was run, by
+reading each answer against the code). Nafis chose not to label them himself for this
+submission; they have not been checked by a person.
 
 **Automated checks run on that work, and what they changed.** Each change was tested with
 unit tests and by driving the real page in headless Chrome against a scripted fake model
@@ -68,19 +73,14 @@ itself; they found real defects, which were fixed before committing:
 | Labelling tool | Scripted input: keys typed faster than prompts were dropped | Changed: buffered line reading |
 | Re-test report | Screenshot: "You own this code" shown for a re-test that covered 2 regions; a ✓ bullet before every before→after row | Changed: re-test heading and wording; bullet removed |
 
-**Human review (A4a / A4b) — to be completed by Nafis.** The rubric asks for a *person*
-checking a specific AI-created contribution and deciding to keep, change or reject it.
-Suggested reviews (about 15 minutes each); record what you actually found:
+**Human direction and decisions (A4).** No separate, written human review of one specific
+AI-created file was carried out for this submission. The human decisions in the project
+were:
 
-1. *GitHub preselection on your own repos.* Load `Nafis8709/reliefsync` and `Nafis8709/SMS`
-   by link. For each, compare the preselected files with the files you would choose for
-   your own viva. Record: which files it picked that you would not, which it missed, and
-   whether you keep the rule in `src/github.js` or change it.
-2. *Wrong-claim penalty.* In `eval/results/<model>.json`, look at answers where
-   `wrongClaims` is not empty. Check whether each listed claim really is wrong about the
-   code, and whether the −3 penalty gave the verdict you labelled. Record the count of
-   correct/incorrect wrong-claim flags and whether you keep, change or remove the penalty.
-
-| Reviewer | What was checked | How | Finding | Decision |
-|---|---|---|---|---|
-| Nafis Ahmed | | | | |
+| Decision by Nafis Ahmed | What it changed |
+|---|---|
+| Chose CodeViva over the other candidate projects | The whole event scope |
+| Approved the prioritised change list and the two-day plan before any code was written | Which features were built, and in what order |
+| Asked for the GitHub push access, the Render deployment and a live test with real Gemini | Live testing found and fixed error-message and grading issues on real calls |
+| Approved the UI plan and then each screen (setup, viva, report) one at a time | Each screen was shipped only after his go-ahead |
+| Chose to use AI-written reference labels instead of labelling the evaluation himself | The evaluation is described as AI-vs-AI agreement, not agreement with a human |

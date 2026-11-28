@@ -9,7 +9,7 @@
 //   grading   - every answer in eval/cases.json, graded by the checklist examiner
 //               (answer key first) and the holistic examiner (model picks the
 //               score, the pre-hackathon behaviour), several times each;
-//               compared with the human labels in eval/labels.json
+//               compared with the reference labels in eval/labels.json
 //   grounding - short vivas on each code bundle; how many questions were
 //               correct first time, repaired, re-asked or left unverified
 //
@@ -215,12 +215,12 @@ function summarise(results, labels, args) {
   lines.push('# CodeViva evaluation results');
   lines.push('');
   lines.push(`Generated ${new Date().toISOString()} by \`npm run eval\` (${args.fake ? '**FAKE MODEL — dry run, not real results**' : 'real model calls'}).`);
-  lines.push(`Evaluation set: ${results[0] ? results[0].answerCount : 0} answers to 5 questions on real student code (C, Python, Java; English, Bangla and Banglish answers). Human labels: ${labelled}.`);
+  lines.push(`Evaluation set: ${results[0] ? results[0].answerCount : 0} answers to 5 questions on real student code (C, Python, Java; English, Bangla and Banglish answers). Reference labels: ${labelled} (written by Claude, the AI assistant used to build this project, and not checked by a person; see eval/README.md).`);
   lines.push('');
 
-  lines.push('## 1. Agreement with the human labels');
+  lines.push('## 1. Agreement with the reference labels');
   lines.push('');
-  lines.push('Verdict = the majority over the repeated runs. "Severe" = the AI said *solid* where the human said *gap*, or the reverse.');
+  lines.push('Verdict = the majority over the repeated runs. "Severe" = the AI said *solid* where the reference label is *gap*, or the reverse.');
   lines.push('');
   lines.push('| Model | Grading | Labelled answers | Exact agreement | Within one step | Severe disagreements |');
   lines.push('|---|---|---|---|---|---|');
@@ -272,7 +272,7 @@ function summarise(results, labels, args) {
   for (const result of results) {
     lines.push(`### ${result.model}`);
     lines.push('');
-    lines.push(`| Answer | Human | ${args.modes.map((m) => (m === 'checklist' ? 'Answer key (runs)' : 'Holistic (runs)')).join(' | ')} |`);
+    lines.push(`| Answer | Reference | ${args.modes.map((m) => (m === 'checklist' ? 'Answer key (runs)' : 'Holistic (runs)')).join(' | ')} |`);
     lines.push(`|---|---|${args.modes.map(() => '---').join('|')}|`);
     const first = result.gradings[args.modes[0]];
     for (let i = 0; i < first.length; i++) {
@@ -344,7 +344,7 @@ async function main() {
   fs.mkdirSync(outDir, { recursive: true });
 
   console.log(`CodeViva evaluation · models: ${args.models.join(', ')} · modes: ${args.modes.join(', ')} · repeats: ${args.repeats}`);
-  console.log(`${answerCount} answers, ${Object.keys(labels).length} human labels${Object.keys(labels).length < answerCount ? ' (run `npm run label` first for agreement numbers)' : ''}.`);
+  console.log(`${answerCount} answers, ${Object.keys(labels).length} reference labels${Object.keys(labels).length < answerCount ? ' (run `npm run label` first for agreement numbers)' : ''}.`);
 
   const results = [];
   for (const model of args.models) {

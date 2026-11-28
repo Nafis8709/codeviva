@@ -79,7 +79,7 @@ Tests: `test/checklist.test.js` (8 tests).
 
 `eval/` — 5 viva questions on real student code (the C sample, the author's SMS Flask
 project and ReliefSync Java project) with 30 answers in English, Bangla and Banglish;
-`npm run label` records the human verdicts, `npm run eval` grades every answer with
+`eval/labels.json` holds reference verdicts written by Claude (not checked by a person; `npm run label` lets anyone replace them with their own), `npm run eval` grades every answer with
 the answer-key and the old holistic grader several times, runs short vivas to count how
 questions were grounded, and writes `eval/results/SUMMARY.md`. See `eval/README.md`.
 Tests: `test/eval-metrics.test.js`.
