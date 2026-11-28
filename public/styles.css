@@ -757,7 +757,7 @@ h2 {
   .progress-dots { order: 3; width: 100%; margin-left: 0; }
   .exam-panel { padding: var(--space-4); min-height: 0; }
   .turn-answer, .turn-grade { margin-left: 0; }
-  .composer-row { display: grid; grid-template-columns: 1fr 1fr; }
+  .composer-row { display: grid; grid-template-columns: auto minmax(0, 1fr); }
   .composer-actions { display: contents; }
   #submit-btn { grid-column: 1 / -1; order: -1; min-height: 48px; }
   .composer-row #mic-btn { margin-right: 0; }
