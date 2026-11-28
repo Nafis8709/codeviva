@@ -118,6 +118,16 @@ input[type="text"]:focus-visible, input[type="search"]:focus-visible, select:foc
 ::placeholder { color: var(--ink-muted); opacity: 1; }
 input[type="checkbox"] { accent-color: var(--ink); width: 16px; height: 16px; margin: 0; }
 
+/* Disclosure toggles: one drawn arrow on every device (the native marker
+   disappears when a summary becomes a 44px flex target on touch screens). */
+summary { list-style: none; cursor: pointer; }
+summary::-webkit-details-marker { display: none; }
+summary::before {
+  content: '▸'; display: inline-block; width: 1em; flex: 0 0 auto;
+  transition: transform 150ms; color: var(--ink-muted);
+}
+details[open] > summary::before { transform: rotate(90deg); }
+
 /* Small uppercase labels share one treatment. */
 .label-caps {
   font-size: var(--text-xs);
@@ -476,11 +486,14 @@ h2 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin-bottom: var(--space-4);
 }
+.viva-progress { min-width: 0; }
+.viva-bar #quit-btn { white-space: nowrap; }
 
-.progress-label { font-family: var(--font-head); font-weight: 600; font-size: var(--text-lg); margin-right: 10px; }
+.progress-label { font-family: var(--font-head); font-weight: 600; font-size: var(--text-lg); margin-right: var(--space-2); }
 .progress-topic { color: var(--ink-muted); font-size: var(--text-base); }
 
 .progress-dots { display: flex; gap: 6px; margin-left: auto; }
@@ -564,9 +577,10 @@ h2 {
 .sw-gap { background: var(--red); }
 
 /* ---------- examiner transcript ---------- */
-.exam-panel { padding: 22px 24px; display: flex; flex-direction: column; min-height: 420px; }
+.exam-panel { padding: var(--space-5); display: flex; flex-direction: column; min-height: 420px; }
+.exam-panel, .transcript > li { min-width: 0; }
 
-.transcript { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 18px; }
+.transcript { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-4); }
 
 .turn-question {
   border-left: 2px solid var(--red);
@@ -650,9 +664,20 @@ h2 {
 
 .composer { margin-top: auto; padding-top: 20px; }
 .composer textarea { width: 100%; min-height: 96px; padding: var(--space-3) 14px; }
-.composer-row { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+.composer-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin-top: var(--space-3); }
 .composer-row #mic-btn { margin-right: auto; }
-.hint { font-size: var(--text-xs); color: var(--ink-muted); text-align: right; margin: 6px 0 0; }
+.composer-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-2); margin-left: auto; }
+.composer .btn { padding: 0 var(--space-3); }
+.hint { font-size: var(--text-xs); color: var(--ink-muted); text-align: right; margin: var(--space-2) 0 0; }
+@media (pointer: coarse) { .hint { display: none; } }
+
+/* The asked lines inside the question: tablets and phones only. */
+.excerpt { margin: var(--space-3) 0 0; border: 1px solid var(--rule); border-left: 3px solid var(--ink); border-radius: 0 var(--radius) var(--radius) 0; background: var(--highlight); overflow-x: auto; }
+.excerpt pre { margin: 0; padding: var(--space-2) 0; font-family: var(--font-code); font-size: var(--text-sm); line-height: 1.6; }
+.excerpt-line { display: flex; min-width: max-content; }
+.excerpt-line .ln { flex: 0 0 auto; width: 3.4em; padding-right: var(--space-3); text-align: right; color: var(--ink-muted); user-select: none; }
+.excerpt-line .lc { padding-right: var(--space-4); white-space: pre; }
+@media (min-width: 900px) { .excerpt { display: none; } }
 
 /* ---------- report ---------- */
 .report-head { display: flex; align-items: center; gap: 36px; padding: 32px 40px; margin-bottom: 20px; }
@@ -703,17 +728,29 @@ h2 {
   .topbar { padding: 14px 16px; }
   .setup-card { padding: 28px 18px 28px 30px; }
   .setup-card::before { left: 16px; }
-  .viva-grid, .report-grid { grid-template-columns: 1fr; }
+  .viva-grid, .report-grid { grid-template-columns: minmax(0, 1fr); }
   .viva-grid .exam-panel { order: -1; }
   .code-panel { position: static; }
   .code-view { max-height: 46vh; min-height: 200px; }
   .report-head { flex-direction: column; align-items: flex-start; gap: 12px; padding: 24px 18px; }
-  .progress-dots { display: none; }
+  .code-panel { margin-top: var(--space-2); }
 }
 
 /* ---------- phone (< 600px) ---------- */
 @media (max-width: 599px) {
   main { padding: var(--space-3); }
+  .viva-bar { align-items: flex-start; }
+  .viva-progress { flex: 1; }
+  .progress-label { display: block; font-size: var(--text-md); }
+  .progress-topic { font-size: var(--text-sm); }
+  .progress-dots { order: 3; width: 100%; margin-left: 0; }
+  .exam-panel { padding: var(--space-4); min-height: 0; }
+  .turn-answer, .turn-grade { margin-left: 0; }
+  .composer-row { display: grid; grid-template-columns: 1fr 1fr; }
+  .composer-actions { display: contents; }
+  #submit-btn { grid-column: 1 / -1; order: -1; min-height: 48px; }
+  .composer-row #mic-btn { margin-right: 0; }
+  .composer-row:not(:has(#mic-btn:not([hidden]))) #dontknow-btn { grid-column: 1 / -1; }
   .setup-card { padding: var(--space-5) var(--space-4) var(--space-5) 30px; }
   .setup-card::before { left: 16px; }
   .lede { font-size: var(--text-base); }

@@ -644,8 +644,37 @@ function renderQuestionTurn(question) {
   }
   item.appendChild(meta);
   item.appendChild(richText('p', 'examiner-text', question.text));
+  const excerpt = renderExcerpt(question);
+  if (excerpt) {
+    item.appendChild(excerpt);
+  }
   $('transcript').appendChild(item);
   item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// The asked lines, shown inside the question on tablets and phones, where the
+// code panel sits below the conversation (hidden by CSS on wide screens).
+const EXCERPT_MAX_LINES = 12;
+
+function renderExcerpt(region) {
+  const file = state.files.find((f) => f.name === region.file);
+  if (!file) {
+    return null;
+  }
+  const lines = splitLines(file.content);
+  const start = Math.max(1, region.startLine);
+  const end = Math.min(lines.length, region.endLine, start + EXCERPT_MAX_LINES - 1);
+  const box = el('figure', 'excerpt');
+  box.setAttribute('aria-label', lineRef(region));
+  const code = el('pre');
+  for (let n = start; n <= end; n++) {
+    const row = el('span', 'excerpt-line');
+    row.appendChild(el('span', 'ln', String(n)));
+    row.appendChild(el('span', 'lc', lines[n - 1] === '' ? ' ' : lines[n - 1]));
+    code.appendChild(row);
+  }
+  box.appendChild(code);
+  return box;
 }
 
 // The answer key, marked: which expected points the answer covered, plus any
